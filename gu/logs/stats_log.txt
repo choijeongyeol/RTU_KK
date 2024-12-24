@@ -1,0 +1,1 @@
+2024-09-26 15:37:56 - Query failed: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'GROUP BY energy_source' at line 11

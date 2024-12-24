@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUT 요청 테스트</title>
+</head>
+<body>
+
+    <h1>Device Reset</h1>
+    <form id="resetForm">
+        <label for="lTid">LTID:</label>
+        <input type="text" id="lTid" name="lTid" required>
+        <button type="submit">Reset Device</button>
+    </form>
+
+<script>
+    document.getElementById('resetForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 폼 제출을 막음
+
+        const lTid = document.getElementById('lTid').value;
+
+        //console.log("Form submitted, lTid: ", lTid);  // 디버깅: 폼이 제출되었는지 확인
+
+        // PUT 요청 전송
+        fetch('http://43.200.77.82/tp_api/app_api.php?function=reset_device', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `lTid=${encodeURIComponent(lTid)}`
+        })
+        .then(response => response.text())  // 응답을 먼저 텍스트로 받음
+        .then(text => {
+           // console.log("Raw response text:", text);  // 서버 응답을 텍스트로 출력하여 확인
+
+            try {
+                const data = JSON.parse(text);  // JSON으로 변환 시도
+                if (data.status === 200) {
+                    alert("Device reset successfully.");
+                } else {
+                   // alert(data.status);
+                    alert("Failed to reset device: " + data.message);
+                }
+            } catch (error) {
+                console.error('Error parsing JSON:', error);  // JSON 파싱 오류 로그 출력
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);  // 요청 전체 오류 처리
+        });
+    });
+</script>
+
+
+</body>
+</html>

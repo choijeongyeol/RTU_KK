@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>API Request</title>
+</head>
+<body>
+    <h2>API Request</h2>
+    <button type="button" onclick="makeApiRequest()">Make API Request</button>
+    <div id="api-response"></div>
+
+    <script>
+        function makeApiRequest() {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                document.getElementById('api-response').innerText = 'No token found. Please log in first.';
+                return;
+            }
+
+            fetch('/gn/test9/api.php', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('api-response').innerText = JSON.stringify(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

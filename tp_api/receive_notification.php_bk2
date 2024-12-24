@@ -1,0 +1,122 @@
+<?php
+require_once($_SERVER['DOCUMENT_ROOT'].'/gu/inc/db_connection.php');
+
+// 로그 파일에 기록하는 함수
+function log_to_file($message) {
+    file_put_contents($_SERVER['DOCUMENT_ROOT'].'/gu/logs/notification_log.txt', $message . "\n", FILE_APPEND | LOCK_EX);
+}
+
+// 서버 환경 정보 확인
+log_to_file("Server received request at: " . date("Y-m-d H:i:s"));
+log_to_file("Request Method: " . $_SERVER['REQUEST_METHOD']);
+log_to_file("Request Headers: " . print_r(getallheaders(), true));
+
+// 1. POST 데이터가 있을 경우 이를 처리
+if (!empty($_POST)) {
+    log_to_file("POST received: " . print_r($_POST, true));
+
+    // POST 데이터를 데이터베이스에 저장
+    global $conn;
+    if ($conn) {
+        try {
+            $post_content = json_encode($_POST);
+            $stmt = $conn->prepare("INSERT INTO test_con (con) VALUES (:con)");
+            $stmt->bindParam(':con', $post_content);
+
+            if ($stmt->execute()) {
+                log_to_file("Data inserted successfully: " . $post_content);
+            } else {
+                log_to_file("Failed to insert POST data: " . $post_content);
+            }
+        } catch (PDOException $e) {
+            log_to_file("Database error: " . $e->getMessage());
+        }
+    } else {
+        log_to_file("Database connection failed");
+    }
+} else {
+    // 2. POST 데이터가 없을 경우, request_body를 확인 (JSON 또는 XML)
+    $request_body = file_get_contents('php://input');  // ThingPlug에서 전송한 데이터를 수신
+
+    if (!$request_body) {
+        log_to_file("No data received in request body");
+        exit;
+    }
+
+    // 수신된 알림 데이터를 로그 파일에 기록
+    log_to_file("Received Notification: " . $request_body);
+
+    // 3. 수신 데이터가 XML인지 확인
+    if (strpos($request_body, '<?xml') !== false) {
+        // XML 파싱 처리
+        libxml_use_internal_errors(true);  // XML 파싱 오류 무시
+        $xml_data = simplexml_load_string($request_body);
+
+        if ($xml_data === false) {
+            // XML 파싱 오류 기록
+            $xml_errors = libxml_get_errors();
+            $error_message = "Failed to parse XML: ";
+            foreach ($xml_errors as $error) {
+                $error_message .= $error->message . " ";
+            }
+            log_to_file($error_message);
+            libxml_clear_errors();
+            exit;  // 파싱에 실패한 경우 종료
+        }
+
+        // XML 파싱 성공, 데이터베이스에 저장
+        log_to_file("Parsed XML Data: " . print_r($xml_data, true));
+
+        global $conn;
+        if ($conn) {
+            try {
+                $stmt = $conn->prepare("INSERT INTO test_con (con) VALUES (:con)");
+                $xml_content = json_encode($xml_data);  // XML 데이터를 JSON으로 변환 후 저장
+                $stmt->bindParam(':con', $xml_content);
+
+                if ($stmt->execute()) {
+                    log_to_file("Data inserted successfully: " . $xml_content);
+                } else {
+                    log_to_file("Failed to insert XML data: " . $xml_content);
+                }
+            } catch (PDOException $e) {
+                log_to_file("Database error: " . $e->getMessage());
+            }
+        } else {
+            log_to_file("Database connection failed");
+        }
+    } else {
+        // 4. JSON 데이터 처리
+        $data = json_decode($request_body, true);
+
+        // JSON 파싱 성공 여부 확인
+        if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
+            $json_error_msg = "JSON Decode Error: " . json_last_error_msg();
+            log_to_file($json_error_msg);
+            exit;
+        } elseif (!empty($data)) {
+            global $conn;
+            if ($conn) {
+                try {
+                    $json_content = json_encode($data);
+                    $stmt = $conn->prepare("INSERT INTO test_con (con) VALUES (:con)");
+                    $stmt->bindParam(':con', $json_content);
+
+                    if ($stmt->execute()) {
+                        log_to_file("Data inserted successfully: " . $json_content);
+                    } else {
+                        log_to_file("Failed to insert JSON data: " . $json_content);
+                    }
+                } catch (PDOException $e) {
+                    log_to_file("Database error: " . $e->getMessage());
+                }
+            } else {
+                log_to_file("Database connection failed");
+            }
+        } else {
+            log_to_file("Received empty JSON data");
+        }
+    }
+}
+
+?>

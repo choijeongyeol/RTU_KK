@@ -1,0 +1,128 @@
+<?php
+
+class ThingPlugAPI {
+    private $appEUI;
+    private $uKey;
+    private $baseUrl;
+
+    public function __construct($appEUI, $uKey) {
+        $this->appEUI = $appEUI;
+        $this->uKey = $uKey;
+        $this->baseUrl = "http://thingplugpf.sktiot.com:9000/{$appEUI}/v1_0/";
+    }
+
+    private function callAPI($method, $endpoint, $data = null, $isXML = false) {
+        $url = $this->baseUrl . $endpoint;
+        $ch = curl_init();
+
+        $headers = [
+            'Accept: application/xml',
+            'locale: ko',
+            'X-M2M-RI: 12345',
+            'X-M2M-Origin: ' . $this->appEUI,
+            'uKey: ' . $this->uKey
+        ];
+
+        if ($method === 'POST' || $method === 'PUT') {
+            $headers[] = $isXML ? 'Content-Type: application/xml' : 'Content-Type: application/json';
+        }
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+        if ($method === 'POST' || $method === 'PUT') {
+            curl_setopt($ch, CURLOPT_POST, true);
+            if ($data) {
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            }
+        } elseif ($method === 'DELETE') {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        }
+
+        //echo "Request URL: " . $url . "<br>";
+
+        $response = curl_exec($ch);
+
+        if ($response === false) {
+            $curlError = curl_error($ch);
+            echo 'cURL Error: ' . $curlError . "<br>";
+            curl_close($ch);
+            return null;
+        }
+
+		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		echo "HTTP 상태 코드: " . $httpCode . "<br>";
+
+		// 요청한 데이터를 디버깅용으로 출력
+		echo "Response: " . $response . "<br>";
+
+
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            echo "HTTP 요청 실패. 상태 코드: " . $httpCode . "<br>";
+            return null;
+        }
+
+        $xmlResponse = simplexml_load_string($response);
+        if ($xmlResponse === false) {
+            echo "XML 응답을 처리하지 못했습니다.<br>";
+            return null;
+        }
+
+        return $xmlResponse;
+    }
+
+    // 모든노드 정보 조회
+	public function getAllNodes() {
+		// POST 요청으로 필요한 데이터가 있는지 확인합니다.
+		$data = [
+			"example_param" => "example_value"
+		];
+		
+		return $this->callAPI('POST', "node", json_encode($data)); // POST 요청의 데이터를 포함
+	}
+
+ 
+    // 노드 정보 조회
+    public function getNodeInfo($LTID) {
+        return $this->callAPI('GET', "node-{$LTID}");
+    }
+
+    // 리모트 CSE 정보 조회
+    public function getRemoteCSEInfo($LTID) {
+        return $this->callAPI('GET', "remoteCSE-{$LTID}");
+    }
+
+    // 최신 데이터 조회
+    public function getLatestData($LTID) {
+        return $this->callAPI('GET', "remoteCSE-{$LTID}/container-LoRa/latest");
+    }
+
+    // 디바이스 리셋 (관리 명령)
+    public function resetDevice($LTID) {
+        $data = '<m2m:mgmtCmd xmlns:m2m="http://www.onem2m.org/xml/protocols">
+                    <op>3</op>
+                    <to>/'. $this->appEUI . '/v1_0/mgmtCmd-' . $LTID . '_DevReset</to>
+                    <fr>/' . $this->appEUI . '</fr>
+                    <ri>' . $this->appEUI . '</ri>
+                    <ty>4</ty>
+                    <pc>
+                        <exra>reset</exra>
+                    </pc>
+                 </m2m:mgmtCmd>';
+        return $this->callAPI('POST', "mgmtCmd-{$LTID}_DevReset", $data, true);
+    }
+
+    // 센서 데이터 저장 (contentInstance 생성)
+    public function createContentInstance($LTID, $sensorData) {
+        $data = '<m2m:cin xmlns:m2m="http://www.onem2m.org/xml/protocols">
+                    <cnf>application/xml</cnf>
+                    <con>' . htmlspecialchars($sensorData) . '</con>
+                 </m2m:cin>';
+        return $this->callAPI('POST', "remoteCSE-{$LTID}/container-LoRa", $data, true);
+    }
+}

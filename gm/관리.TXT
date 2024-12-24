@@ -1,0 +1,63 @@
+
+
+HISTORY
+
+
+<창고등록>
+
+
+검색키워드 : 누가  /  언제 기간설정  /  이용메뉴(위치)  /  한일, 액션  
+ 
+
+누가 /  언제 / 어디에서(IP) /  이용메뉴(위치)  /   한일, 액션( 등록,삭제,업데이트,삽입)    From(변경전), To(변경후)
+
+h_num
+h_type
+h_name
+h_id
+h_date
+h_ip
+h_location
+h_col1
+h_col2
+h_action
+
+
+CREATE TABLE `wms_history` (
+  `h_num` int(11) NOT NULL COMMENT '히스토리 자동증가IDX',
+  `h_type` varchar(5) NOT NULL DEFAULT 'A'
+  `h_name` varchar(255) NOT NULL COMMENT '실행자명',
+  `h_id`   varchar(255) NOT NULL COMMENT '실행자ID',
+  `h_date` datetime DEFAULT NULL COMMENT '실행날짜',
+  `h_ip`   varchar(255) NOT NULL COMMENT '실행IP',
+  `h_location` varchar(255) NOT NULL COMMENT '실행위치경로',
+  `h_col1` varchar(255) NOT NULL COMMENT '실행대상1',
+  `h_col2` varchar(255) NOT NULL COMMENT '실행대상2',
+  `h_action` varchar(255) NOT NULL COMMENT '실행액션',
+  `delYN` varchar(5) NOT NULL DEFAULT 'N'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `wms_history`  MODIFY `h_num` int(11) NOT NULL AUTO_INCREMENT COMMENT '히스토리 자동증가IDX', AUTO_INCREMENT=1;
+
+
+A타입 : 단일저장
+{A} {홍길동}({admin11})님이 / {2024년 1월 15일 11시12분 12초}에 / IP {23.23.45.103} 에서  /  {창고관리 > 창고등록} 업무로 /  {Warehouse1043}             / {창고를 등록}하였습니다.
+{A} {홍길동}({admin11})님이 / {2024년 1월 15일 11시12분 12초}에 / IP {23.23.45.103} 에서  /  {창고관리 > 앵글삽입} 업무로 /  {AG1059}                     / {앵글을 삽입}하였습니다.
+{A} {홍길동}({admin11})님이 / {2024년 1월 15일 11시12분 12초}에 / IP {23.23.45.103} 에서  /  {창고관리 > 제품조회} 업무로 /  {WarehouseA창고내 AG105611앵글의 }   / {제품목록을 조회}하였습니다.
+
+B타입 : 변경저장
+{B} {홍길동}({admin11})님이 / {2024년 1월 15일 11시12분 12초}에 / IP {23.23.45.103} 에서  /  {창고관리 > 창고명 변경} 업무로 /  {Warehouse1043}에서 {Warehouse1047}로   / {창고명을 변경}하였습니다.
+{B} {홍길동}({admin11})님이 / {2024년 1월 15일 11시12분 12초}에 / IP {23.23.45.103} 에서  /  {창고관리 > 앵글명 변경} 업무로 /  {AG105611}에서 {AG105617}로      / {앵글명을 변경}하였습니다.
+ 
+ 
+ 
+홍길동(admin11)님이 2024년 1월 15일 11시12분 12초에 IP 223.23.45.103 에서  창고관리 업무로 Warehouse1043 창고를 등록하였습니다.
+
+홍길동(admin11)님이 2024년 1월 23일 12시32분 44초에 IP 223.23.45.103 에서  창고관리 업무로 AG1059 앵글을 삽입하였습니다.
+
+
+홍길동(admin11)님이 2024년 1월 23일 12시32분 44초에 IP 223.23.45.103 에서  {WMS관리} 업무로 {로그인}{성공} 하였습니다.
+홍길동(admin11)님이 2024년 1월 23일 12시32분 44초에 IP 223.23.45.103 에서  {WMS관리} 업무로 {로그인}{실패} 하였습니다.
+
+홍길동(admin11)님이 2024년 1월 23일 12시32분 44초에 IP 223.23.45.103 에서  {WMS관리} 업무로 {로그아웃} 하였습니다.
+

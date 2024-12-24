@@ -1,0 +1,138 @@
+Server received request at: 2024-09-24 16:27:28
+Request Method: GET
+Request Headers: Array
+(
+    [Host] => 43.200.77.82
+    [Connection] => keep-alive
+    [Cache-Control] => max-age=0
+    [Upgrade-Insecure-Requests] => 1
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Whale/3.27.254.15 Safari/537.36
+    [Accept] => text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+    [Accept-Encoding] => gzip, deflate
+    [Accept-Language] => ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
+)
+
+No data received in request body
+Server received request at: 2024-09-24 16:52:56
+Request Method: POST
+Request Headers: Array
+(
+    [X-M2M-Origin] => 00000799d02544fffef3ca7e
+    [Accept] => application/xml
+    [X-M2M-RI] => f2a58ae2-4e87-4ff7-94ab-068efca060d4
+    [Content-Type] => application/vnd.onem2m-ntfy+xml;charset=UTF-8
+    [User-Agent] => Jakarta Commons-HttpClient/3.0.1
+    [Host] => 43.200.77.82
+    [Content-Length] => 869
+)
+
+Received Notification: <?xml version="1.0" encoding="UTF-8" standalone="yes"?><m2m:cin xmlns:m2m="http://www.onem2m.org/xml/protocols" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ty>4</ty><ri>CI00000000056856471962</ri><rn>CI00000000056856471962</rn><pi>CT00000000000000965459</pi><ct>2024-09-24T16:52:56+09:00</ct><lt>2024-09-24T16:52:56+09:00</lt><ppt><gwl>37.449551,126.891999,0</gwl><geui>f4d9fbfffe81ca9a</geui><devl>37.449551,126.891999,0</devl><fp>2</fp><trid></trid><plidx>0</plidx><ctype>11</ctype><fixType>8</fixType><result>0</result><accuracy>3000</accuracy></ppt><sr>/0060261000000799/v1_0/remoteCSE-00000799d02544fffef3ca7e/container-LoRa/subscription-etrons_3</sr><et>2024-09-25T16:52:56+09:00</et><st>27148</st><cr>RC00000000000001033061</cr><cnf>LoRa/Sensor</cnf><cs>10</cs><con>1406010039</con><containerCurrentByteSize>540718</containerCurrentByteSize></m2m:cin>
+Parsed XML Data: SimpleXMLElement Object
+(
+    [ty] => 4
+    [ri] => CI00000000056856471962
+    [rn] => CI00000000056856471962
+    [pi] => CT00000000000000965459
+    [ct] => 2024-09-24T16:52:56+09:00
+    [lt] => 2024-09-24T16:52:56+09:00
+    [ppt] => SimpleXMLElement Object
+        (
+            [gwl] => 37.449551,126.891999,0
+            [geui] => f4d9fbfffe81ca9a
+            [devl] => 37.449551,126.891999,0
+            [fp] => 2
+            [trid] => SimpleXMLElement Object
+                (
+                )
+
+            [plidx] => 0
+            [ctype] => 11
+            [fixType] => 8
+            [result] => 0
+            [accuracy] => 3000
+        )
+
+    [sr] => /0060261000000799/v1_0/remoteCSE-00000799d02544fffef3ca7e/container-LoRa/subscription-etrons_3
+    [et] => 2024-09-25T16:52:56+09:00
+    [st] => 27148
+    [cr] => RC00000000000001033061
+    [cnf] => LoRa/Sensor
+    [cs] => 10
+    [con] => 1406010039
+    [containerCurrentByteSize] => 540718
+)
+
+Database error: SQLSTATE[22001]: String data, right truncated: 1406 Data too long for column 'con' at row 1
+Server received request at: 2024-09-24 16:57:53
+Request Method: POST
+Request Headers: Array
+(
+    [Host] => 43.200.77.82
+    [User-Agent] => curl/7.81.0
+    [Accept] => */*
+)
+
+No data received in request body
+Server received request at: 2024-09-24 16:59:17
+Request Method: POST
+Request Headers: Array
+(
+    [Host] => 43.200.77.82
+    [User-Agent] => curl/7.81.0
+    [Accept] => */*
+    [Content-Type] => application/json
+    [Content-Length] => 16
+)
+
+Received Notification: {"key": "value"}
+Data inserted successfully: {"key":"value"}
+Server received request at: 2024-09-24 17:07:56
+Request Method: POST
+Request Headers: Array
+(
+    [X-M2M-Origin] => 00000799d02544fffef3ca7e
+    [Accept] => application/xml
+    [X-M2M-RI] => 1ff3da9b-fa46-4145-b863-a0c1519a7772
+    [Content-Type] => application/vnd.onem2m-ntfy+xml;charset=UTF-8
+    [User-Agent] => Jakarta Commons-HttpClient/3.0.1
+    [Host] => 43.200.77.82
+    [Content-Length] => 865
+)
+
+Received Notification: <?xml version="1.0" encoding="UTF-8" standalone="yes"?><m2m:cin xmlns:m2m="http://www.onem2m.org/xml/protocols" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ty>4</ty><ri>CI00000000056856847839</ri><rn>CI00000000056856847839</rn><pi>CT00000000000000965459</pi><ct>2024-09-24T17:07:56+09:00</ct><lt>2024-09-24T17:07:56+09:00</lt><ppt><gwl>37.45402,126.89832,0</gwl><geui>f4d9fbfffe80e04d</geui><devl>37.45402,126.89832,0</devl><fp>2</fp><trid></trid><plidx>0</plidx><ctype>11</ctype><fixType>9</fixType><result>0</result><accuracy>3000</accuracy></ppt><sr>/0060261000000799/v1_0/remoteCSE-00000799d02544fffef3ca7e/container-LoRa/subscription-etrons_3</sr><et>2024-09-25T17:07:56+09:00</et><st>27149</st><cr>RC00000000000001033061</cr><cnf>LoRa/Sensor</cnf><cs>10</cs><con>1406010039</con><containerCurrentByteSize>540728</containerCurrentByteSize></m2m:cin>
+Parsed XML Data: SimpleXMLElement Object
+(
+    [ty] => 4
+    [ri] => CI00000000056856847839
+    [rn] => CI00000000056856847839
+    [pi] => CT00000000000000965459
+    [ct] => 2024-09-24T17:07:56+09:00
+    [lt] => 2024-09-24T17:07:56+09:00
+    [ppt] => SimpleXMLElement Object
+        (
+            [gwl] => 37.45402,126.89832,0
+            [geui] => f4d9fbfffe80e04d
+            [devl] => 37.45402,126.89832,0
+            [fp] => 2
+            [trid] => SimpleXMLElement Object
+                (
+                )
+
+            [plidx] => 0
+            [ctype] => 11
+            [fixType] => 9
+            [result] => 0
+            [accuracy] => 3000
+        )
+
+    [sr] => /0060261000000799/v1_0/remoteCSE-00000799d02544fffef3ca7e/container-LoRa/subscription-etrons_3
+    [et] => 2024-09-25T17:07:56+09:00
+    [st] => 27149
+    [cr] => RC00000000000001033061
+    [cnf] => LoRa/Sensor
+    [cs] => 10
+    [con] => 1406010039
+    [containerCurrentByteSize] => 540728
+)
+
+Database error: SQLSTATE[22001]: String data, right truncated: 1406 Data too long for column 'con' at row 1

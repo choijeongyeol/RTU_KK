@@ -1,0 +1,9 @@
+const ui = SwaggerUIBundle({
+  url: "http://devhanis.shop/swagger-ui/swagger-spec.json", // Swagger 스펙 파일의 경로
+  dom_id: '#swagger-ui',
+  presets: [
+    SwaggerUIBundle.presets.apis,
+    SwaggerUIBundle.SwaggerUIStandalonePreset
+  ],
+  layout: "StandaloneLayout"
+})

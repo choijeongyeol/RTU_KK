@@ -1,0 +1,253 @@
+<?php
+require_once($_SERVER['DOCUMENT_ROOT'].'/gu/inc/db_connection.php');
+
+// 로그 파일에 기록하는 함수
+function log_to_file($message) {
+    $log_file = $_SERVER['DOCUMENT_ROOT'].'/tp_api/logs/notification_log.txt';
+    $result = file_put_contents($log_file, date("Y-m-d H:i:s") . " - " . $message . "\n", FILE_APPEND | LOCK_EX);
+    if ($result === false) {
+        error_log("Failed to write log: " . $message);
+    }
+}
+
+// SQL 오류 로그를 기록하는 함수
+function log_sql_error($stmt, $query_description) {
+    $error_info = $stmt->errorInfo();
+    log_to_file("$query_description failed. SQLSTATE: " . $error_info[0] . ", Error Code: " . $error_info[1] . ", Message: " . $error_info[2]);
+}
+
+// 서버 환경 정보 확인
+log_to_file("Server received request at: " . date("Y-m-d H:i:s"));
+log_to_file("Request Method: " . $_SERVER['REQUEST_METHOD']);
+log_to_file("Request Headers: " . print_r(getallheaders(), true));
+
+// DB 연결
+$conn = getDbConnection();
+if (!$conn) {
+    log_to_file("Database connection failed");
+    exit();
+}
+
+// 트랜잭션 시작
+$conn->beginTransaction();
+
+try {
+    // 1. POST 데이터가 있는 경우 처리
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
+        log_to_file("POST received: " . print_r($_POST, true));
+
+        $date = date("Y-m-d H:i:s");
+        $post_content = json_encode($_POST);
+
+        // RTU_lora_raw 테이블에 데이터 삽입
+        $stmt = $conn->prepare("INSERT INTO RTU_lora_raw (type, con, rdate) VALUES ('POST', :con, :rdate)");
+        $stmt->bindParam(':con', $post_content);
+        $stmt->bindParam(':rdate', $date);
+
+        if (!$stmt->execute()) {
+            log_sql_error($stmt, "Insert POST data into RTU_lora_raw");
+            $conn->rollBack();  // 실패 시 롤백
+            exit();
+        } else {
+            log_to_file("POST data inserted successfully into RTU_lora_raw.");
+        }
+
+        // RTU_6431 테이블에 데이터 삽입 시도
+        log_to_file("Attempting to insert into RTU_6431");
+        
+        // ppt 필드가 중첩된 JSON이므로 각 필드를 분리하여 저장
+        $ppt = $_POST['ppt'] ?? null;
+
+        $gwl = $ppt['gwl'] ?? null;
+        $geui = $ppt['geui'] ?? null;
+        $devl = $ppt['devl'] ?? null;
+        $fp = $ppt['fp'] ?? null;
+        $trid = json_encode($ppt['trid'] ?? null); // trid가 객체일 경우 문자열로 변환
+        $plidx = $ppt['plidx'] ?? null;
+        $ctype = $ppt['ctype'] ?? null;
+        $fixType = $ppt['fixType'] ?? null;
+        $result = $ppt['result'] ?? null;
+        $accuracy = $ppt['accuracy'] ?? null;
+
+        // RTU_6431 테이블에 데이터를 삽입하기 위한 SQL 준비
+        $stmt = $conn->prepare("INSERT INTO RTU_6431 (ty, ri, rn, pi, ct, lt, gwl, geui, devl, fp, trid, plidx, ctype, fixType, result, accuracy, sr, et, st, cr, cnf, cs, con, containerCurrentByteSize, ltid)    VALUES (:ty, :ri, :rn, :pi, :ct, :lt, :gwl, :geui, :devl, :fp, :trid, :plidx, :ctype, :fixType, :result, :accuracy, :sr, :et, :st, :cr, :cnf, :cs, :con, :containerCurrentByteSize, :ltid)");
+
+        // POST 데이터를 가공하여 매핑 (필드가 없으면 null을 사용)
+        $stmt->bindParam(':ty', $_POST['ty'] ?? null);
+        $stmt->bindParam(':ri', $_POST['ri'] ?? null);
+        $stmt->bindParam(':rn', $_POST['rn'] ?? null);
+        $stmt->bindParam(':pi', $_POST['pi'] ?? null);
+        $stmt->bindParam(':ct', $_POST['ct'] ?? null);
+        $stmt->bindParam(':lt', $_POST['lt'] ?? null);
+        $stmt->bindParam(':gwl', $gwl);
+        $stmt->bindParam(':geui', $geui);
+        $stmt->bindParam(':devl', $devl);
+        $stmt->bindParam(':fp', $fp);
+        $stmt->bindParam(':trid', $trid);
+        $stmt->bindParam(':plidx', $plidx);
+        $stmt->bindParam(':ctype', $ctype);
+        $stmt->bindParam(':fixType', $fixType);
+        $stmt->bindParam(':result', $result);
+        $stmt->bindParam(':accuracy', $accuracy);
+        $stmt->bindParam(':sr', $_POST['sr'] ?? null);
+        $stmt->bindParam(':et', $_POST['et'] ?? null);
+        $stmt->bindParam(':st', $_POST['st'] ?? null);
+        $stmt->bindParam(':cr', $_POST['cr'] ?? null);
+        $stmt->bindParam(':cnf', $_POST['cnf'] ?? null);
+        $stmt->bindParam(':cs', $_POST['cs'] ?? null);
+        $stmt->bindParam(':con', $_POST['con'] ?? null); // 실제 데이터 저장
+        $stmt->bindParam(':containerCurrentByteSize', $_POST['containerCurrentByteSize'] ?? null);
+
+		
+			// ltid 필드를 추가하여 3번째 값에서 'remoteCSE-'를 제거하여 저장
+			$sr_value = $_POST['sr'] ?? null;
+			$ltid = null;
+
+			if ($sr_value) {
+				// '/'를 기준으로 문자열을 분리하여 배열로 반환
+				$sr_parts = explode('/', $sr_value);
+
+				// 3번째 값이 있는지 확인 (배열 인덱스는 0부터 시작하므로 [2] 사용)
+				if (isset($sr_parts[2])) {
+					// 'remoteCSE-' 문구를 제거
+					$ltid = str_replace('remoteCSE-', '', $sr_parts[2]);
+				}
+			}		
+		
+		
+        $stmt->bindParam(':ltid', $ltid);
+		
+        // RTU_6431 삽입 실행
+        if (!$stmt->execute()) {
+            log_sql_error($stmt, "Insert data into RTU_6431");
+            $conn->rollBack();  // 실패 시 롤백
+            exit();
+        } else {
+            log_to_file("Data successfully inserted into RTU_6431.");
+        }
+
+    } else {
+        // 2. POST 데이터가 없을 경우, php://input에서 데이터를 확인 (ThingPlug 전송 데이터)
+        $request_body = file_get_contents('php://input');
+
+        if (!$request_body) {
+            log_to_file("No data received in request body");
+            $conn->rollBack();  // 실패 시 롤백
+            exit();
+        }
+
+        log_to_file("Received Notification: " . $request_body);
+
+        // 수신 데이터가 XML인지 확인
+        if (strpos($request_body, '<?xml') !== false) {
+            // XML 파싱 처리
+            libxml_use_internal_errors(true);
+            $xml_data = simplexml_load_string($request_body);
+
+            if ($xml_data === false) {
+                $xml_errors = libxml_get_errors();
+                $error_message = "Failed to parse XML: ";
+                foreach ($xml_errors as $error) {
+                    $error_message .= $error->message . " ";
+                }
+                log_to_file($error_message);
+                libxml_clear_errors();
+                $conn->rollBack();  // 실패 시 롤백
+                exit();
+            }
+
+            // XML 데이터를 JSON으로 변환하여 저장
+            $xml_content = json_encode($xml_data);
+
+            // RTU_lora_raw 테이블에 데이터 삽입
+            $stmt = $conn->prepare("INSERT INTO RTU_lora_raw (type, con, rdate) VALUES ('xml', :con, :rdate)");
+            $stmt->bindParam(':con', $xml_content);
+            $stmt->bindParam(':rdate', date("Y-m-d H:i:s"));
+
+            if (!$stmt->execute()) {
+                log_sql_error($stmt, "Insert XML data into RTU_lora_raw");
+                $conn->rollBack();  // 실패 시 롤백
+                exit();
+            } else {
+                log_to_file("XML data inserted successfully into RTU_lora_raw.");
+            }
+
+            // RTU_6431에 삽입할 데이터도 XML 데이터에서 추출하여 각각 필드에 맞춰야 함
+            $ppt = $xml_data->ppt ?? null;
+
+            $gwl = $ppt->gwl ?? null;
+            $geui = $ppt->geui ?? null;
+            $devl = $ppt->devl ?? null;
+            $fp = $ppt->fp ?? null;
+            $trid = json_encode($ppt->trid ?? null); // trid가 객체일 경우 문자열로 변환
+            $plidx = $ppt->plidx ?? null;
+            $ctype = $ppt->ctype ?? null;
+            $fixType = $ppt->fixType ?? null;
+            $result = $ppt->result ?? null;
+            $accuracy = $ppt->accuracy ?? null;
+
+            $stmt = $conn->prepare("INSERT INTO RTU_6431 (ty, ri, rn, pi, ct, lt, gwl, geui, devl, fp, trid, plidx, ctype, fixType, result, accuracy, sr, et, st, cr, cnf, cs, con, containerCurrentByteSize, ltid)
+            VALUES (:ty, :ri, :rn, :pi, :ct, :lt, :gwl, :geui, :devl, :fp, :trid, :plidx, :ctype, :fixType, :result, :accuracy, :sr, :et, :st, :cr, :cnf, :cs, :con, :containerCurrentByteSize, :ltid)");
+
+            // XML 데이터를 바인딩
+            $stmt->bindParam(':ty', $xml_data->ty);
+            $stmt->bindParam(':ri', $xml_data->ri);
+            $stmt->bindParam(':rn', $xml_data->rn);
+            $stmt->bindParam(':pi', $xml_data->pi);
+            $stmt->bindParam(':ct', $xml_data->ct);
+            $stmt->bindParam(':lt', $xml_data->lt);
+            $stmt->bindParam(':gwl', $gwl);
+            $stmt->bindParam(':geui', $geui);
+            $stmt->bindParam(':devl', $devl);
+            $stmt->bindParam(':fp', $fp);
+            $stmt->bindParam(':trid', $trid);
+            $stmt->bindParam(':plidx', $plidx);
+            $stmt->bindParam(':ctype', $ctype);
+            $stmt->bindParam(':fixType', $fixType);
+            $stmt->bindParam(':result', $result);
+            $stmt->bindParam(':accuracy', $accuracy);
+            $stmt->bindParam(':sr', $xml_data->sr); // /0060261000000799/v1_0/remoteCSE-00000799d02544fffef3ca7e/container-LoRa/subscription-etrons_3
+            $stmt->bindParam(':et', $xml_data->et);
+            $stmt->bindParam(':st', $xml_data->st);
+            $stmt->bindParam(':cr', $xml_data->cr);  
+            $stmt->bindParam(':cnf', $xml_data->cnf);
+            $stmt->bindParam(':cs', $xml_data->cs);
+            $stmt->bindParam(':con', $xml_data->con); 
+            $stmt->bindParam(':containerCurrentByteSize', $xml_data->containerCurrentByteSize);
+
+			// ltid 필드를 추가하여 3번째 값에서 'remoteCSE-'를 제거하여 저장
+			$sr_value = $xml_data->sr ?? null;
+			$ltid = null;
+
+			if ($sr_value) {
+				// '/'를 기준으로 문자열을 분리하여 배열로 반환
+				$sr_parts = explode('/', $sr_value);
+
+				// 3번째 값이 있는지 확인 (배열 인덱스는 0부터 시작하므로 [2] 사용)
+				if (isset($sr_parts[3])) {
+					// 'remoteCSE-' 문구를 제거
+					$ltid = str_replace('remoteCSE-', '', $sr_parts[3]);
+				}
+			}
+
+            $stmt->bindParam(':ltid', $ltid);
+
+
+            if (!$stmt->execute()) {
+                log_sql_error($stmt, "Insert XML data into RTU_6431");
+                $conn->rollBack();  // 실패 시 롤백
+                exit();
+            } else {
+                log_to_file("XML data inserted into RTU_6431 successfully.");
+            }
+        }
+    }
+
+    // 모든 것이 성공하면 커밋
+    $conn->commit();
+
+} catch (PDOException $e) {
+    $conn->rollBack();
+    log_to_file("Transaction failed: " . $e->getMessage());
+}
+?>

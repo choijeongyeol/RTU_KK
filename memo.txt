@@ -1,0 +1,41 @@
+구현 구조
+RTU_6431 테이블에 실시간 데이터 삽입
+MySQL 트리거 또는 PHP 이벤트를 통해 실시간 데이터 처리를 수행
+실시간 통계 테이블에 데이터 저장
+고장 데이터는 RTU_fault_logs 테이블에 실시간으로 기록
+WebSocket을 통해 클라이언트에 실시간 알림을 전달
+
+이 구조를 통해 RTU_6431의 데이터를 실시간으로 처리하고, 다양한 통계 및 알림을 효율적으로 제공할 수 있습니다.
+
+
+
+RTU_daily_statistics, RTU_monthly_statistics에도 각각 일별, 월별로 데이터를 insert 하는 절차를 보여주기바람
+ 
+ 
+ 
+< r6431.id 참조값 채우기 >
+
+UPDATE RTU_real_time_stats rts
+JOIN RTU_6431 r6431
+ON rts.energy_source = r6431.geui
+AND rts.timestamp = r6431.ct
+SET rts.ref_6431id = r6431.id;
+  
+  
+-----------------------------------------------------
+외래 키 제약 조건을 먼저 삭제한 후 열의 collation을 변경하고, 다시 외래 키 제약 조건을 추가 방법 예제
+
+ALTER TABLE RTU_AS_Request DROP FOREIGN KEY RTU_AS_Request_ibfk_2;
+
+
+
+-- RTU_AS_Request 테이블의 technician_id collation 변경
+ALTER TABLE RTU_AS_Request MODIFY technician_id VARCHAR(50) CHARACTER SET utf8 COLLATE utf8_bin;
+
+-- RTU_Technician 테이블의 technician_id collation 변경
+ALTER TABLE RTU_Technician MODIFY technician_id VARCHAR(50) CHARACTER SET utf8 COLLATE utf8_bin;
+
+
+ALTER TABLE RTU_AS_Request
+ADD CONSTRAINT RTU_AS_Request_ibfk_2
+FOREIGN KEY (technician_id) REFERENCES RTU_Technician(technician_id);

@@ -1,0 +1,126 @@
+<?php
+// PHP 오류 표시 활성화
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// API URL 및 Service Key
+$serviceKey = 'NyoDSPoGQxqODN9q+4LEKSX3sUCDNKBGFvCeztIkw79w80/d2RjL57GL2kx62vUStiqkowQdQ8JZdckddaQpSg=='; // 유효한 Service Key 입력
+$url = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst';
+
+// 현재 시간과 날짜 계산
+date_default_timezone_set('Asia/Seoul');
+$currentHour = date('H');
+$currentMinute = date('i');
+
+// base_time 계산 (30분 단위, 매시 45분 이후 데이터 호출 가능)
+if ($currentMinute < 45) {
+    $baseTime = str_pad($currentHour - 1, 2, '0', STR_PAD_LEFT) . '30'; // 이전 시간의 30분
+} else {
+    $baseTime = $currentHour . '30';
+}
+$today = date('Ymd'); // 오늘 날짜 (YYYYMMDD 형식)
+
+// API 요청 파라미터 구성
+$queryParams = '?' . http_build_query([
+    'serviceKey' => $serviceKey,
+    'numOfRows' => '10',
+    'pageNo' => '1',
+    'base_date' => $today,
+    'base_time' => $baseTime,
+    'nx' => '55',
+    'ny' => '127',
+    'dataType' => 'XML',
+]);
+
+// API 호출
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url . $queryParams);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($httpCode === 200) {
+    $xml = simplexml_load_string($response);
+    if ($xml === false) {
+        echo "XML 파싱 실패\n";
+    } else {
+        // 기상 데이터 매핑
+        $weatherData = [
+            'T1H' => '기온 (°C)',
+            'RN1' => '1시간 강수량 (mm)',
+            'UUU' => '동서바람성분 (m/s)',
+            'VVV' => '남북바람성분 (m/s)',
+            'REH' => '습도 (%)',
+            'PTY' => '강수형태 (코드값)',
+            'VEC' => '풍향 (deg)',
+            'WSD' => '풍속 (m/s)' //,
+            //'SKY' => '하늘 상태 (코드값)' // 추가
+        ];
+
+        // 기상 상태 데이터 초기화
+        $weatherStatus = array_fill_keys(array_keys($weatherData), 'N/A');
+        foreach ($xml->body->items->item as $item) {
+            $category = (string)$item->category;
+            $value = (string)$item->obsrValue;
+            if (isset($weatherStatus[$category])) {
+                $weatherStatus[$category] = $value;
+            }
+        }
+
+        // 이미지 선택 및 코멘트 설정
+        $image = '';
+        $image_comment = '';
+        $pty = $weatherStatus['PTY'] ?? '0';
+        $sky = $weatherStatus['SKY'] ?? '1'; // 기본값 설정
+
+        if ($pty != '0') { // 강수 형태가 있을 때
+            switch ($pty) {
+                case '1':
+                    $image = 'images/rain.png';
+                    $image_comment = "비";
+                    break;
+                case '2':
+                    $image = 'images/rain_snow.png';
+                    $image_comment = "비/눈";
+                    break;
+                case '3':
+                    $image = 'images/snow.png';
+                    $image_comment = "눈";
+                    break;
+                case '4':
+                    $image = 'images/shower.png';
+                    $image_comment = "소나기";
+                    break;
+
+            }
+        } else { // 강수 형태가 없을 때
+                    $image = 'images/sunny.png';
+                    $image_comment = "맑음";
+        }
+
+        // HTML 출력
+        echo "<h2>현재 기상 상태</h2>";
+ 
+        echo "<p>기준 날짜: " . substr($today, 0, 4) . '.' . substr($today, 4, 2) . '.' . substr($today, 6, 2) . "</p>";
+        echo "<p>기준 시간: " . substr($baseTime, 0, 2) . ':' . substr($baseTime, 2, 2) . "</p>";
+        if ($image) {
+            echo "<img src='$image' alt='기상 상태' style='width:200px;height:200px;'><br>";
+            echo "<p>현재 날씨: $image_comment</p>";
+        }
+
+        // 상세 기상 정보 출력
+        echo "<h3>상세 기상 정보</h3>";
+        echo "<table border='1'>";
+        echo "<tr><th>항목</th><th>값</th></tr>";
+        foreach ($weatherData as $key => $description) {
+            echo "<tr><td>{$description}</td><td>{$weatherStatus[$key]}</td></tr>";
+        }
+        echo "</table>";
+    }
+} else {
+    echo "API 호출 실패: HTTP 상태 코드 $httpCode\n";
+    echo "응답 내용: $response\n";
+}
+?>

@@ -1,0 +1,2040 @@
+swagger: "2.0"
+info:
+  version: "2.0.0"
+  title: "RTU API"
+  description: "RTU Swagger API 입니다."
+paths:
+  /gu/inc/fn_api_RTU.php:
+    post:
+      summary: "로그인"
+      description: "아이디와 비밀번호로 로그인합니다."
+      tags: ["로그인 API"]      
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - name: API_NUM
+          in: formData
+          description: "로그인 API_NUM"
+          default: 1
+          required: true
+          type: integer
+        - name: user_id
+          in: formData
+          description: "사용자 아이디"
+          default: "testid"
+          required: true
+          type: string
+        - name: user_pw
+          in: formData
+          description: "사용자 비밀번호"
+          default: "1234"
+          required: true
+          type: string
+        - name: user_fcm
+          in: formData
+          description: "사용자의 FCM 토큰"
+          default: "example_fcm_token"
+          required: false
+          type: string	  
+      responses:
+        '100':
+          description: "아이디 비밀번호 불일치 또는 존재하지 않는 아이디"
+        '101':
+          description: "이용중지 계정"
+        '102':
+          description: "삭제된 계정"
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user_idx:
+                        type: integer
+                        example: 1
+                      partner_id:
+                        type: integer
+                        example: 1
+                      user_id:
+                        type: string
+                        example: "TESTID"
+                      user_name:
+                        type: string
+                        example: "유저1"
+                      user_pw:
+                        type: string
+                        example: "$2y$10$p1wt5DDvWpAu2ydhDNXBvOhUE1yGIAtjFrnnz9epjsaqbFy2DAvkq"
+                      user_tel:
+                        type: string
+                        example: "01011112222"
+                      user_addr:
+                        type: string
+                        example: null
+                      user_email:
+                        type: string
+                        example: ""
+                      user_role:
+                        type: integer
+                        example: 1
+                      sms_receive:
+                        type: integer
+                        example: 0
+                      email_receive:
+                        type: integer
+                        example: 0
+                      user_rdate:
+                        type: string
+                        example: "2024-08-05 10:18:49"
+                      user_token:
+                        type: string
+                        example: "dTY4NjkxNjE0NjQ4M0l1ZW55Q2dsR3A="
+                      user_fcm:
+                        type: string
+                        example: "12345"
+                      user_use:
+                        type: string
+                        example: "Y"
+                      delYN:
+                        type: string
+                        example: "N"
+                      created_at:
+                        type: string
+                        example: "2024-10-15 13:53:15"
+                      updated_at:
+                        type: string
+                        example: "2024-11-22 12:48:35"
+                    required:
+                      - user_idx
+                      - partner_id
+                      - user_id
+                      - user_name
+                      - user_pw
+                      - user_tel
+                      - user_role
+                      - user_rdate
+                      - user_use
+                      - delYN
+                      - created_at
+                      - updated_at
+
+ 
+  /gu/inc/fn_api_RTU.php?API_NUM=1001:
+    post:
+      summary: "FCM 토큰 업데이트"
+      description: "사용자의 FCM 토큰을 업데이트한다."
+      tags: ["로그인 API"]  
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: user_id
+          in: query
+          type: string
+          description: "사용자 ID"
+          example: "user123"
+          required: true
+        - name: user_fcm
+          in: query
+          type: string
+          description: "FCM 토큰"
+          example: "dXNlcjEyM0B0b2tlbjEyMw=="
+          required: true
+      responses:
+        200:
+          description: "FCM 토큰 업데이트 성공"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              message:
+                type: string
+                example: "FCM token updated successfully."
+        400:
+          description: "잘못된 요청: 필수 파라미터가 누락되었거나 잘못되었습니다."
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "fail"
+              message:
+                type: string
+                example: "Missing required parameters: user_id, fcm_token"
+        500:
+          description: "서버 오류: FCM 토큰 업데이트 실패"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Failed to update FCM token."
+
+  
+  
+  /gu/inc/fn_api_RTU.php?API_NUM=1002:
+    get:
+      summary: "아이디 찾기"
+      description: "이름과 전화번호로 아이디를 검색한다."
+      tags: ["로그인 API"]      
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: user_name
+          in: query
+          type: string
+          description: "로그인 이름"
+          example: "유저1"	 
+          required: true	  
+        - name: user_tel
+          in: query
+          type: string
+          description: "유저 전화번호"
+          example: "01011112222"
+          required: true	  
+	
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       user_name:
+                          type: string
+                          example: "홍길동"
+                       user_id:
+                          type: string
+                          example: "testid"
+                       user_tel:
+                          type: string
+                          example: "01011112222"
+
+
+  /gu/inc/fn_api_RTU.php?API_NUM=1003:
+    get:
+      summary: "비밀번호 재설정 1/2"
+      description: "이름과 전화번호,아이디를 입력하여 비밀번호를 재설정한다."
+      tags: ["로그인 API"]      
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: user_name
+          in: query
+          type: string
+          description: "로그인 이름"
+          example: "유저1"	 
+          required: true	  
+        - name: user_id
+          in: query
+          type: string
+          description: "로그인 ID"
+          example: "testid"	 
+          required: true	  
+        - name: user_tel
+          in: query
+          type: string
+          description: "유저 전화번호"
+          example: "01011112222"
+          required: true	  
+	
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       user_name:
+                          type: string
+                          example: "유저1"
+                       user_id:
+                          type: string
+                          example: "testid"
+                       user_tel:
+                          type: string
+                          example: "01011112222"
+
+  /gu/inc/fn_api_RTU.php?API_NUM=1004:
+    post:
+      summary: "비밀번호 재설정 2/2"
+      description: "비밀번호 재설정 1/2 완료후, 비밀번호를 재설정한다."
+      tags: ["로그인 API"]      
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: user_name
+          in: query
+          type: string
+          description: "로그인 이름"
+          example: "유저1"	 
+          required: true	  
+        - name: user_id
+          in: query
+          type: string
+          description: "로그인 ID"
+          example: "testid"	 
+          required: true	  
+        - name: user_tel
+          in: query
+          type: string
+          description: "유저 전화번호"
+          example: "01011112222"
+          required: true	  
+        - name: user_pw
+          in: query
+          type: string
+          description: "유저 새 비밀번호"
+          example: "1234"
+          required: true	  
+	
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       user_name:
+                          type: string
+                          example: "유저1"
+                       user_id:
+                          type: string
+                          example: "testid"
+                       user_tel:
+                          type: string
+                          example: "01011112222"
+                       user_pw:
+                          type: string
+                          example: "1234"
+			  
+  /gu/inc/fn_api_RTU.php?API_NUM=1005:
+    post:
+      summary: "FCM"
+      description: "FCM 업데이트를 진행한다."
+      tags: ["로그인 API"]      
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: user_name
+          in: query
+          type: string
+          description: "로그인 이름"
+          example: "유저1"	 
+          required: true	  
+        - name: user_id
+          in: query
+          type: string
+          description: "로그인 ID"
+          example: "testid"	 
+          required: true	  
+        - name: user_tel
+          in: query
+          type: string
+          description: "유저 전화번호"
+          example: "01011112222"
+          required: true	  
+        - name: user_fcm
+          in: query
+          type: string
+          description: "유저 FCM"
+          example: "1234"
+          required: true	  
+	
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+                  message:
+                    type: string
+                    example: "User fcm update successfully"
+
+  /gu/inc/fn_api_RTU.php?API_NUM=6000:
+    get:
+      summary: "모니터링 홈 API SET <수정 : 누적발전량으로 계산>"  
+      description: "6001 ~ 6004"
+      tags: 
+        - "모니터링 홈 API"
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: SUCCESS
+              body:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      short_powerstation:
+                        type: string
+                        example: "노해로9가길 2 발전소"
+                      today_bjr:
+                        type: object
+                        properties:
+                          day:
+                            type: string
+                            example: "2024-10-28"
+                          day_total_energy_kW:
+                            type: string
+                            example: "465.96400"
+                          generation_minutes:
+                            type: integer
+                            example: 488
+                          generation_time:
+                            type: string
+                            example: "8시간 8분"
+                      yesterday_bjr:
+                        type: object
+                        properties:
+                          day:
+                            type: string
+                            example: "2024-10-27"
+                          day_total_energy_kW:
+                            type: string
+                            example: "389.42400"
+                          generation_minutes:
+                            type: integer
+                            example: 578
+                          generation_time:
+                            type: string
+                            example: "9시간 38분"
+                      today_bjr_will:
+                        type: object
+                        properties:
+                          today:
+                            type: string
+                            example: "2024-10-28"
+                          estimated_today_energy_kW:
+                            type: string
+                            example: "388.169816782"
+                      today_bjtime_will:
+                        type: object
+                        properties:
+                          today:
+                            type: string
+                            example: "2024-10-28"
+                          estimated_today_generation_minutes:
+                            type: string
+                            example: "576.1385"
+                      current_output:
+                        type: object
+                        properties:
+                          today:
+                            type: string
+                            example: "2024-10-28"
+                          current_output:
+                            type: integer
+                            example: 2608
+                      lora_status:
+                        type: object
+                        properties:
+                          today:
+                            type: string
+                            example: "2024-10-28"
+                          status:
+                            type: string
+                            example: "정상"
+                      tot_bj_sum:
+                        type: object
+                        properties:
+                          total_day_total_energy_kW:
+                            type: string
+                            example: "5191.60400"
+                          total_generation_minutes:
+                            type: integer
+                            example: 14888
+                          total_generation_time:
+                            type: string
+                            example: "248시간 8분"
+                      inverter_bj_list:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            inverter_no:
+                              type: integer
+                              example: 2410211033146
+                            inverter_status:
+                              type: string
+                              example: "정상"
+                            inverter_bjr:
+                              type: string
+                              example: "2600.0"
+                            inverter_current_output:
+                              type: string
+                              example: "508.0"
+                  msg:
+                    type: string
+                    example: null
+
+
+  /gu/inc/fn_api_RTU.php?API_NUM=6001:
+    get:
+      summary: "오늘하루 총 발전량 및 발전시간 <수정 : 누적발전량으로 계산>"
+      description: "오늘하루 총 발전량 및 발전시간"
+      tags: ["모니터링 홈 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       today:
+                          type: string
+                          example: "2024-10-23"
+                       today_total_energy_kW:
+                          type: string
+                          example: 266.30200
+                       generation_minutes:
+                          type: integer
+                          example: 252
+                       generation_time:
+                          type: string
+                          example: "4시간 12분"
+
+  /gu/inc/fn_api_RTU.php?API_NUM=6002:
+    get:
+      summary: "어제하루 총 발전량 및 발전시간  <수정 : 누적발전량으로 계산>"
+      description: "어제하루 총 발전량 및 발전시간"
+      tags: ["모니터링 홈 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       yesterday:
+                          type: string
+                          example: "2024-10-22"
+                       yesterday_total_energy_kW:
+                          type: string
+                          example: 529.12300
+                       generation_minutes:
+                          type: integer
+                          example: 610
+                       generation_time:
+                          type: string
+                          example: "10시간 10분"
+
+
+  /gu/inc/fn_api_RTU.php?API_NUM=6003:
+    get:
+      summary: "(예상)오늘하루 총 발전량 <수정 : 누적발전량으로 계산>"
+      description: "(예상)오늘하루 총 발전량"
+      tags: ["모니터링 홈 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       today:
+                          type: string
+                          example: "2024-10-23"
+                       estimated_today_energy_kW:
+                          type: string
+                          example: 929.12300
+						  
+  /gu/inc/fn_api_RTU.php?API_NUM=6004:
+    get:
+      summary: "(예상)오늘하루 총 발전시간"
+      description: "(예상)오늘하루 총 발전시간"
+      tags: ["모니터링 홈 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       today:
+                          type: string
+                          example: "2024-10-23"
+                       estimated_today_generation_minutes:
+                          type: string
+                          example: 580.1553
+						  
+  /gu/inc/fn_api_RTU.php?API_NUM=7000:
+    get:
+      summary:  장애 이력 조회 API
+      description:  "7001 ~ 7004"
+      tags:  ["장애 이력 API"]
+      produces:
+        -  application/json
+      security:
+        -  TokenAuth:  []
+      parameters:
+        -  name:  page
+           in:  query
+           description:  페이지 번호
+           required:  true
+           type:  integer
+           format:  int32
+        -  name:  itemsPerPage
+           in:  query
+           description:  페이지당 항목 수
+           required:  true
+           type:  integer
+           format:  int32
+        -  name:  search
+           in:  query
+           description:  "장애명 (issue_name)"
+           required:  false
+           type:  string
+        -  name:  keyword
+           in:  query
+           description:  "지정된 필드에서 검색할 키워드, 분류명 (예: 인버터 장애)"
+           required:  false
+           type:  string
+        -  name:  startDate
+           in:  query
+           description:  "장애 이력 필터링을 위한 시작 날짜 (형식: YYYYMMDD) 예시: 20241029"
+           required:  false
+           type:  string
+           format:  date
+        -  name:  endDate
+           in:  query
+           description:  "장애 이력 필터링을 위한 종료 날짜 (형식: YYYYMMDD) 예시: 20241030"
+           required:  false
+           type:  string
+           format:  date
+        -  name:  status
+           in:  query
+           description:  "장애 상태 필터 (값:의미 '0:전체', '1:미접수', '2:접수완료', '3:AS예정', '4:AS완료', '5:AS취소')"
+           required:  false
+           type:  string
+      responses:
+        '101':
+          description:  "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description:  "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."
+        '200':
+          description:  OK
+          schema:
+            type:  object
+            properties:
+              header:
+                type:  object
+                properties:
+                  resultCode:
+                    type:  integer
+                    example:  200
+                  codeName:
+                    type:  string
+                    example:  SUCCESS
+              body:
+                type:  object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        issue_idx:
+                          type: integer
+                          description: 장애 idx
+                          example: 38
+                        issue_name:
+                          type: string
+                          description: 장애명
+                          example: "네트워크 오류"
+                        issue_type_id:
+                          type: integer
+                          description: 장애 유형 ID
+                          example: 2
+                        fault_description:
+                          type: string
+                          description: 장애명설명
+                          example: "인버터 미작동"
+                        fault_description_summary:
+                          type: string
+                          description: "장애2건이상시"              
+                          example: "인버터 미작동 외 1"
+                        error_first_day:
+                          type: string
+                          format: date
+                          description: 장애 최초 발생 일시
+                          example: "2024-10-28 08:30"
+                        error_last_day:
+                          type: string
+                          format: date
+                          description: 장애 최근 발생 일시
+                          example: "2024-10-28 09:45"
+                        cid_info:
+                          type: integer
+                          description: CID 정보
+                          example:  2410171810229			      
+                        lora_id:
+                          type: string
+                          description: 로라 정보
+                          example: "d02544fffef3b13f"
+                        user_name:
+                          type: string
+                          description: 사용자명
+                          example: "홍길동"
+                        user_id:
+                          type: string
+                          description: 사용자 ID
+                          example: "honggildong"
+                        power_station:
+                          type: string
+                          description: 발전소명
+                          example: "노해로9가길 2 발전소"			      
+                        status:
+                          type: string
+                          description: 장애 상태
+                          example: "4"
+                  msg:
+                    type: string
+                    example: null
+        '500':
+          description:  "서버 내부 오류"
+          schema:
+            type:  object
+            properties:
+              header:
+                type:  object
+                properties:
+                  resultCode:
+                    type:  integer
+                    example:  500
+                  codeName:
+                    type:  string
+                    example:  INTERNAL_SERVER_ERROR
+                  message:
+                    type: string
+                    example:  "데이터베이스 오류"
+
+ 
+  /gu/inc/fn_api_RTU.php?API_NUM=7001:			  
+    get:
+      summary: "AS 신청 화면 상세 정보"
+      description: "특정 장애 이력에 대한 AS 신청 화면을 위한 상세 정보를 반환합니다."
+      tags: ["장애 이력 API"]
+      security:
+        - TokenAuth: []
+      parameters:
+        - in: query
+          name: issue_id
+          required: true
+          schema:
+            type: integer
+          description: "장애 이력 ID. RTU_Issue_History_New 테이블의 특정 장애 항목 ID입니다."
+      responses:
+        '200':
+          description: "성공적으로 장애 이력의 상세 정보를 반환"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                    type: object
+                    properties:
+                      resultCode:
+                        type: integer
+                        example: 200
+                      codeName:
+                        type: string
+                        example: "SUCCESS"
+                  body:
+                    type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          issue_id:
+                            type: integer
+                            example: 2157
+                          issue_start_date:
+                            type: string
+                            format: date-time
+                            example: "2024-11-05 14:02:10"
+                          fault_description:
+                            type: string
+                            example: "인버터 IGBT 에러, 계통 과전류"
+                          issue_status:
+                            type: string
+                            example: "1"
+                          facility_id:
+                            type: integer
+                            example: 2410211519520
+                          user_id:
+                            type: string
+                            example: "BN241017-0001"
+                          user_name:
+                            type: string
+                            example: "동양연사"
+                          facility_address:
+                            type: string
+                            example: ""
+                          rtu_company:
+                            type: string
+                            example: "본사"
+                          communication_type:
+                            type: string
+                            example: "LoRa(SKT)"
+                          lora_id:
+                            type: string
+                            example: "d02544fffef3b162"
+                          power_station_name:
+                            type: string
+                            example: "5공단로 18 발전소"
+                      msg:
+                        type: string
+                        nullable: true
+                        example: null
+        '404':
+          description: "해당 장애 이력을 찾을 수 없습니다."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                    type: object
+                    properties:
+                      resultCode:
+                        type: integer
+                        example: 404
+                      codeName:
+                        type: string
+                        example: "NOT_FOUND"
+                  body:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "해당 장애 이력을 찾을 수 없습니다."
+        '500':
+          description: "서버 내부 오류"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                    type: object
+                    properties:
+                      resultCode:
+                        type: integer
+                        example: 500
+                      codeName:
+                        type: string
+                        example: "INTERNAL_SERVER_ERROR"
+                  body:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "데이터베이스 오류"
+   
+  /gu/inc/fn_api_RTU.php?API_NUM=7002:	
+    post:
+      summary: "AS 요청 생성"
+      description: "특정 장애 이력에 대해 AS 요청을 생성합니다. 첨부파일 업로드가 가능합니다."
+      tags: 
+        - "장애 이력 API"
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      parameters:
+        - in: formData
+          name: issue_id
+          required: true
+          type: integer
+          description: "장애 이력 ID. RTU_Issue_History_New 테이블의 특정 장애 항목 ID입니다."
+        - in: formData
+          name: notes
+          required: false
+          type: string
+          description: "AS 요청에 대한 상세 설명 (선택 사항)"
+        - in: formData
+          name: technician_id
+          required: false
+          type: string
+          description: "담당 AS 기술자의 ID (선택 사항) TMAN 으로 기입바람"
+        - in: formData
+          name: status
+          required: false
+          type: integer
+          default: 2
+          description: "AS 요청 상태. 기본값은 2 (신청)"
+        - in: formData
+          name: attachment
+          required: false
+          type: file
+          description: "AS 요청에 첨부할 파일 (선택 사항)"
+      responses:
+        '200':
+          description: "성공적으로 AS 요청이 생성됨"
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      as_id:
+                        type: integer
+                        example: 1001
+                      issue_id:
+                        type: integer
+                        example: 2157
+                      status:
+                        type: integer
+                        example: 2
+                      notes:
+                        type: string
+                        example: "고객이 작성한 AS 요청 내용입니다."
+                      technician_id:
+                        type: integer
+                        example: 102
+                      request_date:
+                        type: string
+                        format: date-time
+                        example: "2024-11-05 14:30:00"
+                      attachment:
+                        type: object
+                        description: "첨부파일 정보"
+                        properties:
+                          saved_file_name:
+                            type: string
+                            example: "1697552173_a7f8d3cfe3.pdf"
+                            description: "저장된 파일 이름"
+                          original_file_name:
+                            type: string
+                            example: "user_uploaded_file.pdf"
+                            description: "사용자가 업로드한 원본 파일 이름"
+                  msg:
+                    type: string
+                    example: "AS 요청이 성공적으로 제출되었습니다."
+        '400':
+          description: "잘못된 요청 데이터"
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 400
+                  codeName:
+                    type: string
+                    example: "BAD_REQUEST"
+                  message:
+                    type: string
+                    example: "잘못된 요청 데이터입니다."
+        '401':
+          description: "인증 실패 또는 유효하지 않은 토큰"
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 401
+                  codeName:
+                    type: string
+                    example: "UNAUTHORIZED"
+                  message:
+                    type: string
+                    example: "유효하지 않은 토큰입니다."
+        '500':
+          description: "서버 내부 오류"
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 500
+                  codeName:
+                    type: string
+                    example: "INTERNAL_SERVER_ERROR"
+                  message:
+                    type: string
+                    example: "데이터베이스 오류가 발생했습니다."
+
+
+					  
+  /gu/inc/fn_api_RTU.php?API_NUM=7003:	 
+    get:
+      summary: "AS 현황/내역" 
+      description: "AS 현황/내역을 조회합니다." 
+      tags: ["장애 이력 API"]
+      security:
+        - TokenAuth: []
+      parameters:
+        - in: query
+          name: as_id
+          required: true
+          schema:
+            type: integer
+          description: "AS 요청 ID"
+          example: 123
+      responses:
+        '200':
+          description: "AS 현황/내역 조회 성공"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                    type: object
+                    properties:
+                      resultCode:
+                        type: integer
+                        example: 200
+                      codeName:
+                        type: string
+                        example: "SUCCESS"
+                    description: "응답 헤더"
+                  body:
+                    type: object
+                    properties:
+                      as_id:
+                        type: integer
+                        description: "AS ID"
+                        example: 123
+                      as_num:
+                        type: string
+                        description: "AS 번호"
+                        example: "AS-2023-001"
+                      completion_date:
+                        type: string
+                        format: date-time
+                        description: "AS 완료일자"
+                        example: "2023-10-05T14:00:00"
+                      notes:
+                        type: string
+                        description: "AS 기사 메모"
+                        example: "수리가 완료되었습니다."
+                      reservation_date:
+                        type: string
+                        format: date-time
+                        description: "AS 예정일자"
+                        example: "2023-10-03T10:00:00"
+                      as_memo:
+                        type: string
+                        description: "AS 메모"
+                        example: "추가 수리 필요."
+                      issue_name:
+                        type: string
+                        description: "장애 이름"
+                        example: "전력 이상"
+                      issue_start_date:
+                        type: string
+                        format: date-time
+                        description: "최초 장애 일시"
+                        example: "2023-09-25T08:30:00"
+                      facility_id:
+                        type: integer
+                        description: "발전소 ID"
+                        example: 456
+                      lora_idx:
+                        type: integer
+                        description: "LoRa ID"
+                        example: 789
+                      issue_status:
+                        type: integer
+                        description: "장애 상태 코드"
+                        example: 3
+                      fault_description:
+                        type: string
+                        description: "장애 증상 설명"
+                        example: "전력 공급 중단"
+                      viewline:
+                        type: string
+                        description: "뷰라인"
+                        example: "상세 보기"
+                      issue_created_at:
+                        type: string
+                        format: date-time
+                        description: "장애 생성일"
+                        example: "2023-09-25T08:00:00"
+                      발전소명:
+                        type: string
+                        description: "발전소 이름"
+                        example: "태양광 발전소 A"
+        '401':
+          description: "유효하지 않은 토큰"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                    type: object
+                    properties:
+                      resultCode:
+                        type: integer
+                        example: 401
+                      codeName:
+                        type: string
+                        example: "UNAUTHORIZED"
+                      message:
+                        type: string
+                        example: "유효하지 않은 토큰입니다."
+        '404':
+          description: "해당 AS 내역 없음"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                    type: object
+                    properties:
+                      resultCode:
+                        type: integer
+                        example: 404
+                      codeName:
+                        type: string
+                        example: "NOT_FOUND"
+                      message:
+                        type: string
+                        example: "해당 AS 내역이 존재하지 않습니다."
+        '500':
+          description: "서버 오류"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                    type: object
+                    properties:
+                      resultCode:
+                        type: integer
+                        example: 500
+                      codeName:
+                        type: string
+                        example: "INTERNAL_SERVER_ERROR"
+                      message:
+                        type: string
+                        example: "데이터베이스 오류 발생."
+					  
+
+  /gu/inc/fn_api_RTU.php?API_NUM=5000:
+    get:
+      summary: "공지사항"
+      description: "공지사항을 출력한다."
+      tags:
+        - "고객센터 API"
+      produces:
+        - "application/json"
+      security:
+        - TokenAuth: []
+      responses:
+        "200":
+          description: "성공적으로 공지사항이 조회되었습니다."
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 200
+                  codeName:
+                    type: "string"
+                    example: "SUCCESS"
+                description: "응답 상태 헤더"
+              body:
+                type: "object"
+                properties:
+                  data:
+                    type: "object"
+                    properties:
+                      notice_id:
+                        type: "integer"
+                        example: 25
+                        description: "공지사항 ID"
+                      title:
+                        type: "string"
+                        example: "공지사항 제목 예시"
+                        description: "공지사항 제목"
+                      content:
+                        type: "string"
+                        example: "공지사항 내용 예시입니다."
+                        description: "공지사항 내용"
+                      created_at:
+                        type: "string"
+                        format: "date-time"
+                        example: "2024-10-25 15:30:00"
+                        description: "공지사항 생성일시"
+                      pinYN:
+                        type: "string"
+                        example: "Y"
+                        description: "공지사항 상단 고정 여부 (Y/N)"
+        "401":
+          description: "인증 실패 또는 유효하지 않은 토큰"
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 401
+                  codeName:
+                    type: "string"
+                    example: "UNAUTHORIZED"
+                  message:
+                    type: "string"
+                    example: "유효하지 않은 토큰입니다."
+        "500":
+          description: "서버 오류 발생"
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 500
+                  codeName:
+                    type: "string"
+                    example: "INTERNAL_SERVER_ERROR"
+                  message:
+                    type: "string"
+                    example: "서버 내부 오류가 발생했습니다."
+
+
+  /gu/inc/fn_api_RTU.php?API_NUM=5001:
+    get:
+      summary: "FAQ"
+      description: "FAQ를 출력한다. 카테고리를 선택할 수 있으며, 선택하지 않으면 전체 FAQ를 조회한다."
+      tags:
+        - "고객센터 API"
+      produces:
+        - "application/json"
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: "category_id"
+          in: "query"
+          required: false
+          type: "integer"
+          description: "카테고리 ID (1, 2, 3, 4 등). 입력하지 않으면 전체 FAQ를 조회"
+          example: 1
+      responses:
+        "200":
+          description: "성공적으로 FAQ가 조회되었습니다."
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 200
+                  codeName:
+                    type: "string"
+                    example: "SUCCESS"
+                description: "응답 상태 헤더"
+              body:
+                type: "object"
+                properties:
+                  data:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        faq_id:
+                          type: "integer"
+                          example: 1
+                          description: "FAQ ID"
+                        question:
+                          type: "string"
+                          example: "비밀번호는 어떻게 변경하나요?"
+                          description: "FAQ 질문"
+                        answer:
+                          type: "string"
+                          example: "로그인 후, 설정 메뉴에서 비밀번호 변경이 가능합니다."
+                          description: "FAQ 답변"
+                        display_order:
+                          type: "integer"
+                          example: 1
+                          description: "FAQ 표시 순서"
+                        created_at:
+                          type: "string"
+                          format: "date-time"
+                          example: "2024-10-01 10:00:00"
+                          description: "FAQ 생성일시"
+                        updated_at:
+                          type: "string"
+                          format: "date-time"
+                          example: "2024-10-05 15:00:00"
+                          description: "FAQ 수정일시"
+                        category_name:
+                          type: "string"
+                          example: "회원정보"
+                          description: "FAQ 카테고리 이름"
+        "401":
+          description: "인증 실패 또는 유효하지 않은 토큰"
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 401
+                  codeName:
+                    type: "string"
+                    example: "UNAUTHORIZED"
+                  message:
+                    type: "string"
+                    example: "유효하지 않은 토큰입니다."
+        "500":
+          description: "서버 오류 발생"
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 500
+                  codeName:
+                    type: "string"
+                    example: "INTERNAL_SERVER_ERROR"
+                  message:
+                    type: "string"
+                    example: "서버 내부 오류가 발생했습니다."
+
+
+  /gu/inc/fn_api_RTU.php?API_NUM=5002:
+    get:
+      summary: "QNA"
+      description: "QNA 출력한다. 특정 문의 ID로 해당 것만 조회 또는, 선택하지 않으면 전체 QNA 조회한다."
+      tags:
+        - "고객센터 API"
+      produces:
+        - "application/json"
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: inquiry_id
+          in: query
+          required: false
+          description: "특정 문의 ID (입력하지 않으면 전체 조회)"
+          schema:
+            type: integer
+            example: 6
+      responses:
+        "200":
+          description: "성공적으로 QNA가 조회되었습니다."
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 200
+                  codeName:
+                    type: "string"
+                    example: "SUCCESS"
+              body:
+                type: "object"
+                properties:
+                  data:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        inquiry_id:
+                          type: "integer"
+                          example: 6
+                          description: "문의 ID"
+                        user_id:
+                          type: "integer"
+                          example: 1
+                          description: "사용자 ID (문의 작성자)"
+                        title:
+                          type: "string"
+                          example: "장애의심 문의"
+                          description: "문의 제목"
+                        content:
+                          type: "string"
+                          example: "사용 중 장애가 의심되어 문의드립니다."
+                          description: "문의 내용"
+                        status:
+                          type: "string"
+                          example: "0"
+                          description: "문의 상태 (0: 대기중, 1: 답변완료)"
+                        created_at:
+                          type: "string"
+                          format: "date-time"
+                          example: "2024-10-28 14:30:00"
+                          description: "문의 생성일시"
+                        updated_at:
+                          type: "string"
+                          format: "date-time"
+                          example: "2024-11-07 13:53:44"
+                          description: "문의 수정일시"
+                        reply_id:
+                          type: "integer"
+                          example: 4
+                          description: "답변 ID"
+                        admin_id:
+                          type: "integer"
+                          example: 1
+                          description: "답변 작성자 (관리자 ID)"
+                        reply_content:
+                          type: "string"
+                          example: "장애 여부를 확인 중에 있습니다. 곧 답변드리겠습니다."
+                          description: "답변 내용"
+                        reply_created_at:
+                          type: "string"
+                          format: "date-time"
+                          example: "2024-11-01 10:30:00"
+                          description: "답변 생성일시"
+                        reply_updated_at:
+                          type: "string"
+                          format: "date-time"
+                          example: "2024-11-07 13:53:44"
+                          description: "답변 수정일시"
+        "401":
+          description: "인증 실패 또는 유효하지 않은 토큰"
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 401
+                  codeName:
+                    type: "string"
+                    example: "UNAUTHORIZED"
+                  message:
+                    type: "string"
+                    example: "유효하지 않은 토큰입니다."
+        "500":
+          description: "서버 오류 발생"
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 500
+                  codeName:
+                    type: "string"
+                    example: "INTERNAL_SERVER_ERROR"
+                  message:
+                    type: "string"
+                    example: "서버 내부 오류가 발생했습니다."
+		    
+  /gu/inc/fn_api_RTU.php?API_NUM=5003:
+    post:
+      summary: "QNA 등록"
+      description: "새로운 QNA를 등록합니다. 제목과 내용을 필수로 입력해야 하며, 첨부파일은 선택적으로 업로드할 수 있습니다."
+      tags:
+        - "고객센터 API"
+      consumes:
+        - "multipart/form-data"
+      produces:
+        - "application/json"
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: title
+          in: formData
+          required: true
+          type: string
+          description: "질문 제목 (필수)"
+          example: "서비스 요청"
+        - name: content
+          in: formData
+          required: true
+          type: string
+          description: "질문 내용 (필수)"
+          example: "서비스에 대한 요청 사항을 문의드립니다."
+        - name: attachment
+          in: formData
+          required: false
+          type: file
+          description: "첨부파일 (선택)"
+      responses:
+        "200":
+          description: "성공적으로 QNA가 등록되었습니다."
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 200
+                  codeName:
+                    type: "string"
+                    example: "SUCCESS"
+              body:
+                type: "object"
+                properties:
+                  inquiry_id:
+                    type: "integer"
+                    example: 15
+                    description: "생성된 QNA ID"
+                  message:
+                    type: "string"
+                    example: "QNA가 성공적으로 등록되었습니다."
+                  attachment:
+                    type: "object"
+                    description: "첨부파일 정보"
+                    properties:
+                      saved_file_name:
+                        type: "string"
+                        example: "1697552173_a7f8d3cfe3.pdf"
+                        description: "저장된 파일 이름"
+                      original_file_name:
+                        type: "string"
+                        example: "file.pdf"
+                        description: "원래 파일 이름"
+        "400":
+          description: "입력 데이터가 유효하지 않습니다."
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 400
+                  codeName:
+                    type: "string"
+                    example: "BAD_REQUEST"
+                  message:
+                    type: "string"
+                    example: "필수 필드가 누락되었습니다."
+        "401":
+          description: "인증 실패 또는 유효하지 않은 토큰"
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 401
+                  codeName:
+                    type: "string"
+                    example: "UNAUTHORIZED"
+                  message:
+                    type: "string"
+                    example: "유효하지 않은 토큰입니다."
+        "500":
+          description: "서버 오류 발생"
+          schema:
+            type: "object"
+            properties:
+              header:
+                type: "object"
+                properties:
+                  resultCode:
+                    type: "integer"
+                    example: 500
+                  codeName:
+                    type: "string"
+                    example: "INTERNAL_SERVER_ERROR"
+                  message:
+                    type: "string"
+                    example: "서버 내부 오류가 발생했습니다."
+
+
+
+				  
+  /gu/inc/fn_api_RTU.php?API_NUM=8000:
+    get:
+      summary: "통계분석"
+      description: "통계분석 데이터를 출력합니다. 지정된 CID로 해당 발전소 데이터를 조회하며, 선택하지 않으면 사용자 ID와 연동된 첫 번째 CID를 기준으로 조회합니다. `view_type`을 통해 일별, 월별, 연별, 또는 기간별 조회가 가능합니다."
+      tags:
+        - "통계분석 API"
+      produces:
+        - "application/json"
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: cid
+          in: query
+          required: false
+          description: "발전소 CID. 선택하지 않으면 사용자 ID와 연동된 첫 번째 CID로 조회합니다."
+          type: string
+        - name: view_type
+          in: query
+          required: false
+          description: "통계 조회 타입 (일별: t_day, 월별: t_month, 연별: t_year, 기간 선택: t_between). 기본값은 't_day'입니다."
+          type: string
+          enum:
+            - t_day
+            - t_month
+            - t_year
+            - t_between
+        - name: date
+          in: query
+          required: false
+          description: "조회 기준 날짜. 미기재 시 기본값은 오늘 날짜입니다."
+          type: string
+          format: date
+        - name: date_offset
+          in: query
+          required: false
+          description: "기간 변경 값 (이전/다음 날짜로 조정할 때 사용). 일별, 월별, 연별 조회 시 사용."
+          type: integer
+          default: 0
+      responses:
+        200:
+          description: "성공적으로 통계 데이터가 반환되었습니다."
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "OK"
+              body:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      total_output_kwh:
+                        type: number
+                        description: "총 발전량 (KWh)"
+                        example: 1760.0
+                      average_output_kwh:
+                        type: number
+                        description: "평균 발전량 (KWh)"
+                        example: 62.0
+                      total_hours:
+                        type: string
+                        description: "총 발전 시간 (시간 및 분)"
+                        example: "8시간 51분"
+                      statistics:
+                        type: array
+                        description: "지정된 기간에 대한 시간대별 또는 일/월/연 단위 통계 데이터"
+                        items:
+                          type: object
+                          properties:
+                            day:
+                              type: string
+                              description: "날짜 (월별/연별 조회 시)"
+                              example: "2024-10-01"
+                            hour:
+                              type: integer
+                              description: "시간 (일별 조회 시)"
+                              example: 14
+                            total_output:
+                              type: number
+                              description: "총 발전량 (KWh)"
+                              example: 43
+                            avg_efficiency:
+                              type: number
+                              description: "발전 효율 (%)"
+                              example: 100
+                            status:
+                              type: string
+                              description: "상태 (정상 또는 비정상)"
+                              example: "정상"
+        404:
+          description: "지정된 사용자 또는 발전소(CID)가 존재하지 않습니다."
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 404
+                  codeName:
+                    type: string
+                    example: "Not Found"
+              body:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "해당 사용자의 CID를 찾을 수 없습니다."
+        500:
+          description: "서버 오류 발생."
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 500
+                  codeName:
+                    type: string
+                    example: "Internal Server Error"
+              body:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "서버 처리 중 오류가 발생했습니다."
+
+				  
+ 
+ 
+ 
+  /gu/inc/fn_api_RTU.php?API_NUM=9999:
+    get:
+      summary: "연습API"
+      description: "연습 데이터를 출력합니다."
+      tags:
+        - "연습API"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "API_NUM"
+          in: "query"
+          description: "API 고유 번호 (9999)"
+          required: true
+          schema:
+            type: "integer"
+            example: 9999
+      responses:
+        "200":
+          description: "성공적으로 연습 데이터를 반환"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                    type: object
+                    properties:
+                      resultCode:
+                        type: integer
+                        example: 200
+                      codeName:
+                        type: string
+                        example: "SUCCESS"
+                  body:
+                    type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          status:
+                            type: integer
+                            example: 1
+                          originCurrentPower:
+                            type: string
+                            example: "120"
+                          originGeneratedEnergy:
+                            type: string
+                            example: "3775"
+                          originGenerationTime:
+                            type: string
+                            example: "11시간20분"
+                      msg:
+                        type: string
+                        nullable: true
+                        example: null
+        "401":
+          description: "인증 오류"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                    type: object
+                    properties:
+                      resultCode:
+                        type: integer
+                        example: 401
+                      codeName:
+                        type: string
+                        example: "UNAUTHORIZED"
+                  body:
+                    type: object
+                    properties:
+                      msg:
+                        type: string
+                        description: "오류 메시지"
+                        example: "Unauthorized access."
+      security:
+        - TokenAuth: []
+
+
+ 
+ 
+ 
+      
+securityDefinitions:
+  TokenAuth:
+    type: apiKey
+    in: header
+    name: Authorization
+    description: "테스트용 토큰: MTY4NjkxNjE0NjQ4M0l1ZW55Q2dsR3A="

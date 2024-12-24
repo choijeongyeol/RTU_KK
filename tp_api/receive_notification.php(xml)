@@ -1,0 +1,69 @@
+<?php
+require_once($_SERVER['DOCUMENT_ROOT'].'/gu/inc/db_connection.php');
+
+// 로그 파일에 기록하는 함수 (파일 잠금 포함)
+function log_to_file($message) {
+    file_put_contents($_SERVER['DOCUMENT_ROOT'].'/gu/logs/notification_log.txt', $message . "\n", FILE_APPEND | LOCK_EX);
+}
+
+// POST 데이터 로그에 기록
+log_to_file("Notification received: " . print_r($_POST, true));
+
+// 알림 수신 코드
+$request_body = file_get_contents('php://input');  // ThingPlug에서 전송한 데이터를 수신
+
+// 수신된 알림 데이터를 로그 파일에 기록
+log_to_file("Received Notification: " . $request_body);
+
+// XML로 변환하여 처리
+libxml_use_internal_errors(true); // XML 파싱 오류를 처리하기 위해 내부 오류를 활성화
+$xml_data = simplexml_load_string($request_body);
+
+if ($xml_data === false) {
+    // XML 파싱 오류 발생 시 로그 파일에 오류 메시지 기록
+    $xml_errors = libxml_get_errors();
+    $error_message = "Failed to parse XML: ";
+    foreach ($xml_errors as $error) {
+        $error_message .= $error->message . " ";
+    }
+    log_to_file($error_message);
+    libxml_clear_errors();
+} else {
+    // XML 데이터를 배열로 변환하여 데이터 처리
+    $json_data = json_encode($xml_data);
+    $data = json_decode($json_data, true); // 데이터를 배열로 변환
+
+    // 배열로 변환한 데이터 로그에 기록
+    log_to_file("Parsed Data: " . print_r($data, true));
+
+    // 데이터베이스 연결 확인
+    if ($conn) {
+        // 필요한 데이터 추출
+        $con = isset($data['con']) ? $data['con'] : null;
+
+        if ($con) {
+            // SQL 실행
+            try {
+                $stmt = $conn->prepare("INSERT INTO test_con (con) VALUES (:con)");
+                $stmt->bindParam(':con', $con);
+
+                // 데이터베이스 삽입 성공 여부 체크
+                if ($stmt->execute()) {
+                    log_to_file("Data inserted successfully: " . $con);
+                } else {
+                    log_to_file("Failed to insert data: " . $con);
+                }
+            } catch (PDOException $e) {
+                // 데이터베이스 오류를 텍스트 파일에 기록
+                log_to_file("Database error: " . $e->getMessage());
+            }
+        } else {
+            log_to_file("No 'con' field found in parsed data.");
+        }
+    } else {
+        // 데이터베이스 연결 실패 시 로그 파일에 기록
+        log_to_file("Database connection failed");
+    }
+}
+
+?>

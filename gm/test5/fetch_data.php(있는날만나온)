@@ -1,0 +1,33 @@
+<?php
+// db_connection.php 파일을 include하여 데이터베이스 연결
+require_once($_SERVER['DOCUMENT_ROOT'].'/gm/inc/db_connection.php'); 
+
+// 시작 날짜와 종료 날짜를 POST로 받아옴
+$start_date = $_GET['start_date'];
+$end_date = $_GET['end_date'];
+
+try {
+    // 시작 날짜부터 종료 날짜까지의 날짜와 해당 날짜의 입고량을 쿼리로 가져옴
+    $query = "SELECT DATE(rdate) AS date, SUM(quantity) AS total_quantity 
+              FROM wms_stock 
+              WHERE DATE(rdate) BETWEEN :start_date AND :end_date 
+              GROUP BY DATE(rdate)";
+    $statement = $conn->prepare($query);
+    $statement->execute(array(':start_date' => $start_date, ':end_date' => $end_date));
+    $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+    // 결과를 JSON 형식으로 반환
+    $response = array();
+    $dates = array();
+    $quantities = array();
+    foreach ($result as $row) {
+        $dates[] = $row['date'];
+        $quantities[] = (int)$row['total_quantity'];
+    }
+    $response['dates'] = $dates;
+    $response['quantities'] = $quantities;
+    echo json_encode($response);
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
+}
+?>

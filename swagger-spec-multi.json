@@ -1,0 +1,1335 @@
+swagger: "2.0"
+info:
+  version: "2.0.0"
+  title: "WMS API"
+  description: "멀티 WMS Swagger API 입니다."
+paths:
+  /gm/inc/fn_api_multi.php:
+    post:
+      summary: "로그인"
+      description: "아이디와 비밀번호로 로그인합니다."
+      tags: ["로그인 API"]      
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - name: API_NUM
+          in: formData
+          description: "로그인 API_NUM"
+          default: 1
+          required: true
+          type: integer
+        - name: partner_id
+          in: formData
+          description: "파트너번호"
+          default: "1234"
+          required: true
+          type: string
+        - name: user_id
+          in: formData
+          description: "사용자 아이디"
+          default: "testid"
+          required: true
+          type: string
+        - name: user_pw
+          in: formData
+          description: "사용자 비밀번호"
+          default: "1234"
+          required: true
+          type: string
+      responses:
+        '100':
+          description: "아이디 비밀번호 불일치 또는 존재하지 않는 아이디"
+        '101':
+          description: "이용중지 계정"
+        '102':
+          description: "삭제된 계정"
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user_idx:
+                        type: integer
+                        example: "9"
+                      user_id:
+                        type: integer
+                        example: "testid"
+                      user_name:
+                        type: string
+                        example: "테스트유저"
+                      user_pw:
+                        type: string
+                        example: "$2y$10$TFWEm5T.bFTu.zsaY8yx4.Hmk6BBGj5yO/pDMErDnjaHyL4N8zfr6"
+                      user_role:
+                        type: integer
+                        example: "41"
+                      user_rdate:
+                        type: string
+                        example: "2024-02-21 09:39:25"
+                      user_use:
+                        type: string
+                        example: "Y"
+                      delYN:
+                        type: string
+                        example: "N"
+                    required:
+                      - user_idx
+                      - user_id
+                      - user_name
+                      - user_pw
+                      - user_role
+                      - user_rdate
+                      - user_use
+                      - delYN
+
+  /gm/inc/fn_api_multi.php?API_NUM=2:
+    get:
+      summary: "창고 등록전, 창고코드 자동생성"
+      description: "창고 등록전 자동생성되는 창고코드값 받아오기"
+      tags: ["창고 API"]  
+      produces:
+        - application/json
+      parameters:
+        - name: API_NUM
+          in: query
+          description: "창고생성전, API_NUM"
+          default: 2
+          required: true
+          type: integer
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."      
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                  warehouse_code:
+                    type: string
+                    example: "W1057"
+
+  /gm/inc/fn_api_multi.php?API_NUM=3:
+    post:
+      summary: "(partner) 창고 등록"
+      description: "새로운 창고를 시스템에 등록합니다."
+      tags: ["창고 API"]  
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - name: API_NUM
+          in: formData
+          description: "창고생성 API_NUM"
+          default: 3
+          required: true
+          type: integer
+        - name: warehouse_code
+          in: formData
+          description: "등록할 창고코드명"
+          required: true
+          type: string
+        - name: warehouse_name
+          in: formData
+          description: "등록할 창고명"
+          required: true
+          type: string
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                  warehouse_code:
+                    type: string
+                    example: "W1050"
+                  warehouse_name:
+                    type: string
+                    example: "Warehouse1050"
+                  warehouse_rdate:
+                    type: string
+                    example: "2024-04-29 18:44:36"
+                  delYN:
+                    type: string
+                    example: "N"
+
+
+  /gm/inc/fn_api_multi.php?API_NUM=5:
+    get:
+      summary: "창고 목록 조회"
+      description: "창고 및 적재장소 조회"
+      tags: ["창고 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        warehouse_id:
+                          type: integer
+                          example: 1
+                        warehouse_code:
+                          type: string
+                          example: "W1050"
+                        warehouse_name:
+                          type: string
+                          example: "Warehouse1050"
+                        warehouse_rdate:
+                          type: string
+                          example: "2024-04-29 18:44:36"
+                        delYN:
+                          type: string
+                          example: "N"
+
+
+  /gm/inc/fn_api_multi.php?API_NUM=4:
+    post:
+      summary: "창고 삭제"
+      description: "창고를 시스템에서 삭제합니다."
+      tags: ["창고 API"]
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - name: API_NUM
+          in: formData
+          description: "창고삭제 API_NUM"
+          default: 4
+          required: true
+          type: integer
+        - name: warehouse_id
+          in: formData
+          description: "삭제대상 창고ID"
+          required: true
+          type: integer
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."    
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "창고가 성공적으로 삭제되었습니다."
+                  warehouse_id:
+                    type: integer
+                    example: 1
+                  warehouse_name:
+                    type: string
+                    example: "Warehouse1050"
+                  delYN:
+                    type: string
+                    example: "Y"
+
+
+
+  /gm/inc/fn_api_multi.php?API_NUM=6:
+    get:
+      summary: "제품 목록 조회"
+      description: "제품 조회"
+      tags: ["제품 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       item_expose:
+                          type: string
+                          example: "Y"
+                       item_cate:
+                          type: string
+                          example: "분류1"
+                       item_id:
+                          type: integer
+                          example: 46
+                       item_code:
+                          type: integer
+                          example: 2024050981443
+                       item_name:
+                          type: string
+                          example: "e123"
+                       item_rdate:
+                          type: string
+                          example: "2024-05-09"
+                       item_cate_num:
+                          type: integer
+                          example: "1"
+                       sum_quantity_item:
+                          type: integer
+                          example: 0
+
+
+  /gm/inc/fn_api_multi.php?API_NUM=7:
+    get:
+      summary: "재고목록 조회 (query)"
+      description: "재고목록 조회"
+      tags: ["재고관리 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: page
+          in: query
+          type: integer
+          description: "출력할 페이지번호"	  
+          example: 1	
+          default: 1	  
+          required: true	  
+        - name: itemsPerPage
+          in: query
+          type: integer
+          description: "페이지당 레코드수"	  
+          example: 10	
+          default: 10	
+          required: true      
+        - name: searchType
+          in: query
+          type: string
+          description: "검색어 종류"
+          enum: ["ALL", "item_name", "warehouse_name", "angle_name"]
+          example: "item_name"
+          default: "ALL"	  
+        - name: keyword
+          in: query
+          type: string
+          description: "검색어 (제품명)"
+          example: "Product"	
+        - name: searchStoreDateType
+          in: query
+          type: string
+          description: "날짜 종류 (업데이트)"
+          default: "STORE_EXPECTED_DATE"	  
+        - name: searchStartDate
+          in: query
+          required: false
+          type: string
+          format: date
+          description: "조회 시작 날짜 (YYYY-MM-DD)"
+          example: "2024-05-01"
+        - name: searchEndDate
+          in: query
+          required: false
+          type: string
+          format: date
+          description: "조회 종료 날짜 (YYYY-MM-DD)"
+          example: "2024-05-27"	  	
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       stock_id:
+                          type: integer
+                          example: 238
+                       item_id:
+                          type: integer
+                          example: 33
+                       warehouse_id:
+                          type: integer
+                          example: 2
+                       angle_id:
+                          type: integer
+                          example: 11
+                       quantity:
+                          type: integer
+                          example: 23
+                       rdate:
+                          type: string
+                          example: "2024-05-09"
+                       delYN:
+                          type: string
+                          example: "N"
+                       item_name:
+                          type: string
+                          example: "Q2"
+                       warehouse_id_null:
+                          type: integer
+                          example: 2
+                       item_cate_num:
+                          type: string
+                          example: "1"
+                       warehouse_name:
+                          type: string
+                          example: "BBBBB"
+                       angle_name:
+                          type: string
+                          example: "ag11"
+                 total_count:
+                   type: integer
+                   example: 100	
+
+
+			  
+  /gm/inc/fn_api_multi.php?API_NUM=8:			  
+    post:
+      summary: "재고이동 (JSON)"
+      description: "재고목록에서 제품 재고이동을 합니다."
+      tags: ["재고관리 API"]
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: "재고 정보"
+          required: true
+          schema:
+            type: object
+            properties:
+              API_NUM:
+                type: integer
+                description: "재고이동 API_NUM"
+                example: 8
+              stock_id:
+                type: integer
+                description: "Stock 고유ID"
+                example: 5
+              to_ware_id:
+                type: integer
+                description: "이동후 창고ID"
+                example: 12
+              to_angle_id:
+                type: integer
+                description: "이동후 앵글ID"
+                example: 13
+              to_cnt:
+                type: integer
+                description: "이동후 카운트"
+                example: 14
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."
+        '103':
+          description: "입력한 ID값이 없습니다."
+        '104':
+          description: "올바르지 않는 숫자입니다."
+        '105':
+          description: "입고수량이 예정수량을 초과합니다."
+        '107':
+          description: "현재 재고수량 오류"
+        '108':
+          description: "재고이동 수량초과"
+        '109':
+          description: "동일 창고앵글입니다."
+        '110':
+          description: "양수로 입력바랍니다."
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                  NULL
+
+ 
+  /gm/inc/fn_api_multi.php?API_NUM=17:
+    get:
+      summary: "창고앵글목록(query)"
+      description: "창고앵글목록 조회"
+      tags: ["재고관리 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        warehouse_id:
+                          type: integer
+                          example: 1
+                        warehouse_name:
+                          type: string
+                          example: "Warehouse1050"
+                        angle_cnt:
+                          type: integer
+                          example: 4
+                        angle_id:
+                          type: integer
+                          example: 12
+                        angle_name:
+                          type: string
+                          example: "AG234"
+
+
+
+
+  /gm/inc/fn_api_multi.php?API_NUM=15:
+    get:
+      summary: "출고지시 목록 조회1 날짜 (query)"
+      description: "출고지시 목록 조회"
+      tags: ["출고지시관리 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: page
+          in: query
+          type: integer
+          description: "출력할 페이지번호"	  
+          example: 1	
+          default: 1	  
+          required: true	  
+        - name: itemsPerPage
+          in: query
+          type: integer
+          description: "페이지당 레코드수"	  
+          example: 10	
+          default: 10	
+          required: true      
+        - name: searchType
+          in: query
+          type: string
+          description: "검색어 종류"
+          enum: ["item_name", "company_name"]
+          example: "item_name"	
+        - name: keyword
+          in: query
+          type: string
+          description: "검색어 (제품명 또는 업체명)"
+          example: "Product"	
+        - name: searchStoreDateType
+          in: query
+          type: string
+          description: "날짜 종류 (출고예정일)"
+          default: "STORE_EXPECTED_DATE"
+        - name: searchStartDate
+          in: query
+          required: false
+          type: string
+          format: date
+          description: "조회 시작 날짜 (YYYY-MM-DD)"
+          example: "2024-05-01"
+        - name: searchEndDate
+          in: query
+          required: false
+          type: string
+          format: date
+          description: "조회 종료 날짜 (YYYY-MM-DD)"
+          example: "2024-05-27"
+        - name: searchStoreStatus
+          in: query
+          required: false
+          type: string
+          description: "상태 (출고대기)"
+          default: "0"		
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       plan_date:
+                          type: string
+                          example: "2024-05-09"
+
+
+
+  /gm/inc/fn_api_multi.php?API_NUM=9:
+    get:
+      summary: "출고지시 목록 조회 (query)"
+      description: "출고지시 목록 조회"
+      tags: ["출고지시관리 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: page
+          in: query
+          type: integer
+          description: "출력할 페이지번호"	  
+          example: 1	
+          default: 1	  
+          required: true	  
+        - name: itemsPerPage
+          in: query
+          type: integer
+          description: "페이지당 레코드수"	  
+          example: 10	
+          default: 10	
+          required: true      
+        - name: searchType
+          in: query
+          type: string
+          description: "검색어 종류"
+          enum: ["ALL", "item_name", "company_name", "warehouse_name", "angle_name"]
+          example: "item_name"	
+          default: "ALL"	  
+        - name: keyword
+          in: query
+          type: string
+          description: "검색어 (전체/제품명/업체명/창고명/앵글명)"
+          example: "Product"	
+        - name: searchStoreDateType
+          in: query
+          type: string
+          description: "날짜 종류 (출고예정일)"
+          default: "STORE_EXPECTED_DATE"
+        - name: searchStartDate
+          in: query
+          required: false
+          type: string
+          format: date
+          description: "조회 시작 날짜 (YYYY-MM-DD)"
+          example: "2024-05-01"
+        - name: searchEndDate
+          in: query
+          required: false
+          type: string
+          format: date
+          description: "조회 종료 날짜 (YYYY-MM-DD)"
+          example: "2024-05-27"
+        - name: searchStoreStatus
+          in: query
+          required: false
+          type: string
+          description: "상태 (출고대기)"
+          default: "0"		
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       outbound_id:
+                          type: integer
+                          example: 292
+                       item_name:
+                          type: string
+                          example: "p66"
+                       warehouse_name:
+                          type: string
+                          example: "Warehouse A"
+                       angle_name:
+                          type: string
+                          example: "AG1001"
+                       company_name:
+                          type: string
+                          example: "회사AA"
+                       planned_quantity:
+                          type: integer
+                          example: 20
+                       outbound_quantity:
+                          type: integer
+                          example: 20
+                       plan_date:
+                          type: string
+                          example: "2024-05-09"
+                       rdate:
+                          type: string
+                          example: "2024-05-09"
+                       state:
+                          type: integer
+                          example: 1
+                       stock_quantity:
+                          type: integer
+                          example: 7
+                 total_count:
+                   type: integer
+                   example: 100			  
+			  
+			  
+  /gm/inc/fn_api_multi.php?API_NUM=12:			  
+    post:
+      summary: "출고 단수건 등록 (JSON)"
+      description: "출고 단수건 등록합니다."
+      tags: ["출고지시관리 API"]
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: API_NUM
+          in: query
+          description: "출고 API_NUM"
+          default: 12
+          required: true
+          type: integer
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              outbound_id:
+                type: integer
+                description: "출고지시테이블 고유키IDX"
+              outbound_quantity:
+                type: integer
+                description: "출고수량" 
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."
+        '103':
+          description: "입력한 ID값이 없습니다."
+        '104':
+          description: "올바르지 않는 숫자입니다."
+        '111':
+          description: "재고수량은 항상 0 이상이어야 합니다."
+        '115':
+          description: "출고수량이 예정수량을 초과하였습니다."
+        '205':
+          description: "출고수량이 예정수량을 초과합니다."
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 NULL
+ 			  
+  /gm/inc/fn_api_multi.php?API_NUM=16:			  
+    post:
+      summary: "출고 복수건 등록 (JSON)"
+      description: "출고 복수건 등록합니다."
+      tags: ["출고지시관리 API"] 
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: outbound_data
+          in: body
+          description: "출고 데이터 배열"
+          required: true
+          schema:
+            type: object
+            properties:
+              outbound_data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    outbound_id:
+                      type: integer
+                    outbound_quantity:
+                      type: integer
+      security:
+        - TokenAuth: []	  
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."
+        '103':
+          description: "입력한 ID값이 없습니다."
+        '104':
+          description: "올바르지 않는 숫자입니다."
+        '105':
+          description: "출고수량이 예정수량을 초과합니다."
+        '106':
+          description: "출고에러"
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"     
+                  message:
+                    type: string
+                    example: "정상 출고완료"     
+ 
+			  
+  /gm/inc/fn_api_multi.php?API_NUM=14:
+    get:
+      summary: "입고지시 목록 조회1 날짜 (query)"
+      description: "입고지시 목록 조회"
+      tags: ["입고지시관리 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: page
+          in: query
+          type: integer
+          description: "출력할 페이지번호"	  
+          example: 1	
+          default: 1	  
+          required: true	  
+        - name: itemsPerPage
+          in: query
+          type: integer
+          description: "페이지당 레코드수"	  
+          example: 10	
+          default: 10	
+          required: true	  
+        - name: searchType
+          in: query
+          type: string
+          description: "검색어 종류"
+          enum: ["item_name"]
+          example: "item_name"	
+        - name: keyword
+          in: query
+          type: string
+          description: "검색어 (제품명)"
+          example: "Product"	
+        - name: searchStoreDateType
+          in: query
+          type: string
+          description: "날짜 종류 (입고예정일)"
+          default: "STORE_EXPECTED_DATE"	  
+        - name: searchStartDate
+          in: query
+          required: false
+          type: string
+          format: date
+          description: "조회 시작 날짜 (YYYY-MM-DD)"
+          example: "2024-05-01"
+        - name: searchEndDate
+          in: query
+          required: false
+          type: string
+          format: date
+          description: "조회 종료 날짜 (YYYY-MM-DD)"
+          example: "2024-05-27"
+        - name: searchStoreStatus
+          in: query
+          required: false
+          type: string
+          description: "상태 (입고대기)"
+          default: "0"	  	  
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       plan_date:
+                          type: string
+                          example: "2024-05-09"
+
+
+			  
+			  
+  /gm/inc/fn_api_multi.php?API_NUM=10:
+    get:
+      summary: "입고지시 목록 조회 (query)"
+      description: "입고지시 목록 조회"
+      tags: ["입고지시관리 API"]
+      produces:
+        - application/json
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: page
+          in: query
+          type: integer
+          description: "출력할 페이지번호"	  
+          example: 1	
+          default: 1	  
+          required: true	  
+        - name: itemsPerPage
+          in: query
+          type: integer
+          description: "페이지당 레코드수"	  
+          example: 10	
+          default: 10	
+          required: true	  
+        - name: searchType
+          in: query
+          type: string
+          description: "검색어 종류"
+          enum: ["ALL", "item_name", "warehouse_name", "angle_name"]
+          example: "item_name"	
+          default: "ALL"	  
+        - name: keyword
+          in: query
+          type: string
+          description: "검색어 (전체/제품명/창고명/앵글명)"
+          example: "Product"	
+        - name: searchStoreDateType
+          in: query
+          type: string
+          description: "날짜 종류 (입고예정일)"
+          default: "STORE_EXPECTED_DATE"	  
+        - name: searchStartDate
+          in: query
+          required: false
+          type: string
+          format: date
+          description: "조회 시작 날짜 (YYYY-MM-DD)"
+          example: "2024-05-01"
+        - name: searchEndDate
+          in: query
+          required: false
+          type: string
+          format: date
+          description: "조회 종료 날짜 (YYYY-MM-DD)"
+          example: "2024-05-27"
+        - name: searchStoreStatus
+          in: query
+          required: false
+          type: string
+          description: "상태 (입고대기)"
+          default: "0"	  	  
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."        
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                 data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                       inbound_id:
+                          type: integer
+                          example: 341
+                       item_name:
+                          type: string
+                          example: "p333"
+                       item_code:
+                          type: integer
+                          example: 2024011700007
+                       warehouse_name:
+                          type: string
+                          example: "Warehouse C"
+                       angle_name:
+                          type: string
+                          example: "AG6666"
+                       company_name:
+                          type: string
+                          example: null
+                       planned_quantity:
+                          type: integer
+                          example: 21
+                       inbound_quantity:
+                          type: integer
+                          example: 21
+                       plan_date:
+                          type: string
+                          example: "2024-05-09"
+                       rdate:
+                          type: string
+                          example: "2024-05-09"
+                       state:
+                          type: integer
+                          example: 1			  
+                 total_count:
+                   type: integer
+                   example: 120
+			  
+			  
+			  
+  /gm/inc/fn_api_multi.php?API_NUM=11:			  
+    post:
+      summary: "입고 단수건 등록 (JSON)"
+      description: "입고 단수건 등록합니다."
+      tags: ["입고지시관리 API"] 
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: "입고 정보"
+          required: true
+          schema:
+            type: object
+            properties:
+              API_NUM:
+                type: integer
+                description: "입고 API_NUM"
+                example: 11
+              inbound_id:
+                type: integer
+                description: "입고지시테이블 고유키IDX"
+                example: 123
+              inbound_quantity:
+                type: integer
+                description: "입고수량"
+                example: 10
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."
+        '103':
+          description: "입력한 ID값이 없습니다."
+        '104':
+          description: "올바르지 않는 숫자입니다."
+        '105':
+          description: "입고수량이 예정수량을 초과합니다."
+        '111':
+          description: "입고 재고수량은 항상 0이상 이어야 합니다."
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+              body:
+                type: object
+                properties:
+                  NULL
+      
+      
+  /gm/inc/fn_api_multi.php?API_NUM=13:
+    post:
+      summary: "입고 복수건 등록 (JSON)"
+      description: "입고 복수건 등록합니다."
+      tags: ["입고지시관리 API"] 
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: inbound_data
+          in: body
+          description: "입고 데이터 배열"
+          required: true
+          schema:
+            type: object
+            properties:
+              inbound_data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    inbound_id:
+                      type: integer
+                    inbound_quantity:
+                      type: integer
+      security:
+        - TokenAuth: []
+      responses:
+        '101':
+          description: "(토큰값이 공백) 토큰값이 없습니다."
+        '102':
+          description: "(토큰값이 다름) 토큰에 해당하는 사용자가 없습니다."
+        '103':
+          description: "입력한 ID값이 없습니다."
+        '104':
+          description: "올바르지 않는 숫자입니다."
+        '105':
+          description: "입고수량이 예정수량을 초과합니다."
+        '106':
+          description: "입고에러"
+        '111':
+          description: "입고 재고수량은 항상 0이상 이어야 합니다."
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              header:
+                type: object
+                properties:
+                  resultCode:
+                    type: integer
+                    example: 200
+                  codeName:
+                    type: string
+                    example: "SUCCESS"
+                  message:
+                    type: string
+                    example: "정상 입고완료"
+
+      
+securityDefinitions:
+  TokenAuth:
+    type: apiKey
+    in: header
+    name: Authorization
+    description: "테스트용 토큰: MTY4NjkxNjE0NjQ4M0l1ZW55Q2dsR3A="

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<?php
+$i = 0;
+while ($i < 10) {
+    $this_f_name = "m02_angle";
+    $this_f_txt = "삽입(엑셀)"; // 분류
+?>
+    <form action='/excel/upload_<?php echo $this_f_name; ?>.php?warehouse_id=<?php echo "{$warehouse['warehouse_id']}"; ?>' method="post" enctype="multipart/form-data" target="upload_iframe" onsubmit="showPopup();">
+        <label for="file"><u><a href="/excel/sample_excel/sample_<?php echo $this_f_name; ?>.xlsx">샘플</a></u></label>
+        <input type="file" name="file" id="file_<?php echo $i; ?>" class="custom-file-input" onchange="handleFileChange('<?php echo $i; ?>')" style="display: none;">
+        <label for="file_<?php echo $i; ?>" id="file_label_<?php echo $i; ?>" class="file-label">파일 선택</label>
+        <button type="submit" class='btn btn-secondary btn-sm' style='<?php echo $permission_W_button; ?> padding:2px; margin-right:0px; margin-bottom:0px; width:90px; height:20px; font-weight:bold; background-color:#3c8259'> <?php echo $this_f_txt; ?></button>
+    </form>
+<?php
+    $i = $i + 1;
+}
+?>
+
+<script>
+    function handleFileChange(index) {
+        const fileInput = document.getElementById('file_' + index);
+        const fileLabel = document.getElementById('file_label_' + index);
+
+        if (fileInput.files.length > 0) {
+            fileLabel.innerHTML = '선택 완료';
+        } else {
+            fileLabel.innerHTML = '파일 선택';
+        }
+    }
+</script>
+
+</body>
+</html>

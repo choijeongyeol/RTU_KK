@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>입고지시 추가</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    // 추가 버튼 클릭 시 동적 필드 생성
+    $('#add_button').click(function(){
+        var html = '<div class="field_group">';
+        html += '<label>제품명</label>';
+        html += '<select name="product_name[]" class="product_select"></select>';
+        html += '<label>업체명</label>';
+        html += '<select name="company_name[]" class="company_select"></select>';
+        html += '<label>창고명</label>';
+        html += '<select name="warehouse_name[]" class="warehouse_select"></select>';
+        html += '<label>앵글명</label>';
+        html += '<select name="angle_name[]" class="angle_select"></select>';
+        html += '<label>예정수량</label>';
+        html += '<input type="text" name="planned_quantity[]">';
+        html += '<label>입고수량</label>';
+        html += '<input type="text" name="inbound_quantity[]">';
+        html += '<button type="button" class="remove_button">삭제</button>';
+        html += '</div>';
+        $('#field_container').append(html);
+
+        // 동적으로 추가된 필드에 데이터 가져오기
+        $.get("get_products.php", function(data){
+            $('.product_select:last').html(data);
+        });
+
+        $.get("get_companies.php", function(data){
+            $('.company_select:last').html(data);
+        });
+
+        $.get("get_warehouses.php", function(data){
+            $('.warehouse_select:last').html(data);
+        });
+
+        $.get("get_angles.php", function(data){
+            $('.angle_select:last').html(data);
+        });
+    });
+
+    // 삭제 버튼 클릭 시 해당 필드 삭제
+    $(document).on('click', '.remove_button', function(){
+        $(this).closest('.field_group').remove();
+    });
+
+    // 저장 버튼 클릭 시 데이터 전송
+    $('#save_button').click(function(){
+        var formData = $('#inbound_form').serialize();
+        $.post("save_inbound.php", formData, function(response){
+            alert(response);
+            // 추가 작업 수행 (예: 페이지 새로고침)
+        });
+    });
+});
+</script>
+</head>
+<body>
+
+<h2>입고지시 추가</h2>
+
+<form id="inbound_form">
+    <button type="button" id="add_button">추가</button>
+    <button type="button" id="save_button">저장</button>
+
+    <div id="field_container">
+        <!-- 동적으로 생성될 필드들이 여기에 추가됩니다. -->
+    </div>
+</form>
+
+</body>
+</html>

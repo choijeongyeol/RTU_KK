@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>통계 분석 메인 화면</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>통계 분석 메인 화면</h1>
+    
+    <label>날짜 선택: </label>
+    <input type="date" id="startDate">
+    <input type="date" id="endDate">
+    
+    <label>발전소 선택 (LoRa ID): </label>
+    <select id="lora_id">
+        <option value="d02544fffef3b13f">d02544fffef3b13f</option>
+        <option value="d02544fffef3b162">d02544fffef3b162</option>
+        <!-- 추가 발전소 LoRaID 옵션 -->
+    </select>
+
+    <button id="get_stats">통계 보기</button>
+
+    <div id="result"></div>
+
+    <script>
+        $('#get_stats').on('click', function() {
+            var lora_id = $('#lora_id').val();
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+
+            $.ajax({
+                url: 'http://43.200.77.82/gu/inc/fn_api_RTU.php?API_NUM=7',
+                type: 'GET',
+                data: {
+                    lora_id: lora_id,
+                    startDate: startDate,
+                    endDate: endDate
+                },
+                success: function(response) {
+                    console.log("서버 응답 원본:", response); // 서버에서 온 응답 출력
+
+                    if (typeof response === 'object') {
+                        console.log("서버에서 이미 JSON 객체를 반환했습니다.");
+                        displayResult(response); 
+                    } else {
+                        try {
+                            var data = JSON.parse(response);
+                            console.log("실행된 SQL:", data.header.sql); // 쿼리문 확인
+                            console.log("사용된 파라미터:", data.header.params); // 파라미터 확인
+                            displayResult(data);
+                        } catch (e) {
+                            console.error("JSON 파싱 에러:", e);
+                            $('#result').html('<p>응답 데이터를 처리할 수 없습니다.</p>');
+                        }
+                    }
+                },
+                error: function(error) {
+                    console.error("AJAX 요청 실패:", error);
+                    $('#result').html('<p>에러가 발생했습니다. 서버에 연결할 수 없습니다.</p>');
+                }
+            });
+        });
+
+        function displayResult(data) {
+            var result = '<h2>통계 결과</h2>';
+             
+            // 통계 결과를 출력 (데이터가 있는 경우)
+            if (data.body && data.body.data && data.body.data.length > 0) {
+                data.body.data.forEach(function(stat) {
+                    result += '<p>날짜: ' + stat.latest_rdate + ', 발전량: ' + stat.total_energy + 'kW, 고장 횟수: ' + stat.fault_count + '</p>';
+                });
+            } else {
+                result += '<p>데이터가 없습니다.</p>';
+            }
+
+            // 쿼리문과 파라미터를 항상 출력
+            if (data.header && data.header.sql) {
+              //  result += '<h3>실행된 SQL 쿼리</h3>';
+               // result += '<p>' + data.header.sql + '</p>';
+            }
+
+            if (data.header && data.header.params) {
+               // result += '<h3>사용된 파라미터</h3>';
+                // 배열일 경우 join을 사용하고, 그렇지 않으면 값을 출력
+                if (Array.isArray(data.header.params)) {
+                //    result += '<p>' + data.header.params.join(", ") + '</p>';
+                } else {
+                //    result += '<p>' + JSON.stringify(data.header.params) + '</p>';
+                }
+            }
+
+            $('#result').html(result);
+        }
+    </script>
+</body>
+</html>

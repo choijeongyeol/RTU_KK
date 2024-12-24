@@ -1,0 +1,108 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    height: 100%; /* 전체 화면 높이를 기준으로 설정 */	
+}
+
+body {
+    display: flex;
+    flex-direction: column; /* 수직 레이아웃 */
+    font-family: 'Arial', sans-serif;
+}
+
+main {
+    flex: 1; /* 본문 내용을 푸터 위로 확장 */
+    padding: 20px;
+}
+
+/* 좌측 상단 고정 로고 */
+.logo {
+    position: fixed; /* 화면 고정 */
+    top: 10px; /* 상단 여백 */
+    left: 10px; /* 좌측 여백 */
+    font-size: 24px;
+    font-weight: bold;
+    color: #0033cc; /* 파란색 */
+    z-index: 100; /* 메뉴 위에 표시 */
+}
+
+.logo span {
+    color: #000; /* 검은색 */
+}
+
+.logo::before {
+    content: "↩"; /* 화살표 추가 */
+    margin-right: 5px;
+    font-size: 20px;
+    color: #0033cc;
+}
+
+header {
+    background-color: #f8f8f8;
+    padding: 10px 0; /* 상단 간격 */
+    border-bottom: 1px solid #ddd;
+}
+
+nav {
+    display: flex;
+    justify-content: center; /* 메뉴를 화면 가운데 정렬 */
+    align-items: center; /* 수직 정렬 */
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex; /* 수평 정렬 */
+}
+
+nav ul li {
+    margin: 0 20px; /* 좌우 간격 */
+    position: relative; /* 드롭다운 기준 위치 */
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+nav ul li ul {
+    display: none; /* 숨김 */
+    position: absolute;
+    top: 100%; /* 부모 아래 위치 */
+    left: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 10px 0;
+    width: 250px;
+    z-index: 10; /* 드롭다운 메뉴가 다른 요소 위로 오도록 설정 */
+}
+
+nav ul li:hover ul {
+    display: block; /* 부모 hover 시 표시 */
+}
+
+nav ul li ul li a {
+    display: block;
+    padding: 5px 20px;
+    text-decoration: none;
+    color: #333;
+}
+
+nav ul li ul li a:hover {
+    background-color: #f0f0f0; /* 하위 메뉴 hover 배경 */
+}
+
+footer {
+    background-color: #f8f8f8; /* 푸터 배경 색상 */
+    text-align: center; /* 가운데 정렬 */
+    padding: 20px 0; /* 상하 여백 */
+    border-top: 1px solid #ddd; /* 상단 경계선 */
+    font-size: 14px; /* 글자 크기 */
+    color: #666; /* 글자 색상 */
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}

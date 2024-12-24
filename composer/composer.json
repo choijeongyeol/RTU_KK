@@ -1,0 +1,8 @@
+{
+    "require": {
+        "phpoffice/phpspreadsheet": "^1.8",
+        "firebase/php-jwt": "^6.0",
+        "picqer/php-barcode-generator": "^0.3.0",
+        "zircote/swagger-php": "^3.0"
+    }
+}
